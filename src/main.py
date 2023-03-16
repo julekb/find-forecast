@@ -1,12 +1,12 @@
 import os
 
-from adapters.windycom.client import WindyComClient
-from services import WindyComService
+from src.adapters.windycom.client import WindyComClient
+from src.services import WindyComExternalService
 
 
 if __name__ == '__main__':
 
-    service = WindyComService(
+    service = WindyComExternalService(
         client=WindyComClient(
         user=os.environ["METEOMATICS_USER"],
         password=os.environ["METEOMATICS_PASSWORD"]

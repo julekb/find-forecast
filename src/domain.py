@@ -1,11 +1,17 @@
 from typing import List, Dict
+import abc
 
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar, field
 from datetime import datetime
 
 
-class BaseDomainModel:
-    pass
+class BaseDomainModel(abc.ABC):
+    """Abstract base domain class."""
+    created_at: datetime = field(init=False)
+
+    def __post_init__(self):
+        """Automatically set created_at timestamp."""
+        self.created_at = datetime.now()
 
 
 @dataclass(frozen=True)
@@ -27,10 +33,8 @@ class ConditionsDataPoint(BaseDomainModel):
 @dataclass(frozen=True)
 class Forecast(BaseDomainModel):
     """Forecast domain model represents a forecast for a location for a given time interval."""
-    #: Creation date.
-    created_at: datetime.date
     #: A timestamp when the forecast is valid.
-    valid_at: datetime.date
+    valid_at: datetime
 
     data: List[Dict[datetime, ConditionsDataPoint]]
 

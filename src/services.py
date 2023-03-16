@@ -13,7 +13,11 @@ class ForecastData:
     value: str
 
 
-class ExternalBaseService:
+class BaseService(abc.ABC):
+    """Abstract base service class."""
+
+
+class ExternalBaseService(BaseService):
     """Base abstract service."""
 
     name: str
@@ -39,10 +43,11 @@ class WindyComExternalService(ExternalBaseService):
             target_timestamp=target_timestamp, extra_params=extra_params, lon=lon, lat=lat
         )
         forecast = ConditionsDataPoint(forecast[0]['coordinates'][0]['dates'][0])
+
         return forecast
 
 
-class ForecastService:
+class ForecastService(BaseService):
     """Forecast service."""
     def __init__(self, external_services):
         self.external_services = {service.name: service for service in external_services}

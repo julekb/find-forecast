@@ -16,7 +16,7 @@ class BaseClient:
         """Get forcast data"""
 
 
-class WindyComClient:
+class WindyComClient(BaseClient):
     base_url: str
     user: str
     password: str
