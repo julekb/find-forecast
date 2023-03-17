@@ -4,6 +4,8 @@ import abc
 import datetime
 import requests
 
+from src.dtos import ForecastDTO
+
 METEOMATICS_API_URL = "https://api.meteomatics.com"
 
 
@@ -12,7 +14,7 @@ class BaseClient:
     @abc.abstractmethod
     def get_forecast_data(
             self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
-    ) -> dict:
+    ) -> ForecastDTO:
         """Get forcast data"""
 
 
@@ -29,10 +31,10 @@ class WindyComClient(BaseClient):
 
     def get_forecast_data(
             self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
-    ) -> dict:
+    ) -> ForecastDTO:
         response = requests.get(
             f"{self.base_url}/{str(target_timestamp.date())}T00:00:00Z/{extra_params}/{lon},{lat}/json",
             auth=HTTPBasicAuth(self.user, self.password))
         if response.status_code != HTTPStatus.OK:
             raise Exception(f'External call failed. Msg: {response.status_code} - {response.reason}')
-        return response.json()["data"]
+        return ForecastDTO(response.json()["data"][0]["coordinates"][0]["dates"][0]["value"])

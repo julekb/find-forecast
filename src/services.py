@@ -39,10 +39,10 @@ class WindyComExternalService(ExternalBaseService):
     def get_forecast(
             self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
     ) -> ConditionsDataPoint:
-        forecast = self.client.get_forecast_data(
+        forecast_dto = self.client.get_forecast_data(
             target_timestamp=target_timestamp, extra_params=extra_params, lon=lon, lat=lat
         )
-        forecast = ConditionsDataPoint(forecast[0]['coordinates'][0]['dates'][0])
+        forecast = ConditionsDataPoint(forecast_dto.value)
 
         return forecast
 
@@ -61,13 +61,13 @@ class ForecastService(BaseService):
 
     def get_forecast_for_location(self, location: Location, extra_params, target_timestamp) -> Forecast:
         external_service = self.get_external_service(self.external_services_names[0])
-        raw_forecast = external_service.get_forecast(
+        cdp = external_service.get_forecast(
             target_timestamp=target_timestamp, extra_params=extra_params, lon=location.lon, lat=location.lat
         )
 
         forecast = Forecast(
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
-            data=[{raw_forecast.wind_speed['date']: raw_forecast.wind_speed['value']}]
+            data=[cdp]
         )
         return forecast

@@ -5,7 +5,8 @@ import pytest
 
 from src.adapters.windycom.client import WindyComClient
 from src.services import WindyComExternalService, ForecastService
-from src.domain import Location, Forecast
+from src.domain import Location, Forecast, ConditionsDataPoint
+from src.dtos import ForecastDTO
 
 
 class TestCase:
@@ -27,7 +28,7 @@ class TestCase:
             target_timestamp=yesterday, extra_params=params, lon=lon, lat=lat
         )
 
-        assert isinstance(forecast, list)
+        assert isinstance(forecast, ForecastDTO)
 
     def test_service(self, client):
         service = WindyComExternalService(client=client)
@@ -40,7 +41,7 @@ class TestCase:
         forecast = service.get_forecast(
             target_timestamp=yesterday, extra_params=params, lon=lon, lat=lat
         )
-        assert isinstance(forecast, Forecast)
+        assert isinstance(forecast, ConditionsDataPoint)
 
     def test_forecast_service(self, client):
         external_service = WindyComExternalService(client=client)
