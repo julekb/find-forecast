@@ -1,13 +1,11 @@
 from http import HTTPStatus
 from requests.auth import HTTPBasicAuth
-import abc
+import os
 import datetime
 import requests
 
 from src.adapters.models import ForecastBaseClient
 from src.dtos import ForecastDTO
-
-METEOMATICS_API_URL = "https://api.meteomatics.com"
 
 
 class WindyComClient(ForecastBaseClient):
@@ -15,7 +13,7 @@ class WindyComClient(ForecastBaseClient):
     user: str
     password: str
 
-    def __init_service__(self, user, password, base_url=METEOMATICS_API_URL):
+    def __init_service__(self, user, password, base_url=os.environ["METEOMATICS_API_URL"]):
         self.base_url = base_url
         # this is not safe
         self.user = user
