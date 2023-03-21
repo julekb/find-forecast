@@ -5,7 +5,8 @@ import datetime
 
 
 from src.adapters.models import ForecastBaseClient
-from src.domain import Location, Forecast, ConditionsDataPoint
+from src.domain import Location, Forecast, ConditionsDataPoint, WindParams, ForecastParams
+from src.utils import create_bijection_dict
 
 
 @dataclass(frozen=True)
@@ -46,6 +47,28 @@ class WindyComExternalService(ExternalBaseService):
         forecast = ConditionsDataPoint(forecast_dto.value)
 
         return forecast
+
+
+class OpenMeteoExternalService(ExternalBaseService):
+    DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict({
+        WindParams.WIND_SPEED: "windspeed_10m",
+        WindParams.WIND_DIRECTION: "winddirection_10m",
+        WindParams.WIND_GUSTS: "windgusts_10m"
+    })
+
+    def __init__(self, client: ForecastBaseClient):
+        self.client = client
+
+    def get_forecast(
+            self, forecast_params: ForecastParams) -> Forecast:
+        forecast_raw = self.client.get_forecast_data(
+            target_timestamp=forecast_params.target_timestamp,
+            extra_params="",
+            wind_params=[self.DOMAIN_TO_QUERY_PARAMS_MAP[p] for p in forecast_params.wind],
+            lon=forecast_params.location.lon,
+            lat=forecast_params.location.lat
+        )
+        return forecast_raw
 
 
 class ForecastService(BaseService):

@@ -2,9 +2,9 @@ from http import HTTPStatus
 import datetime
 import requests
 import os
+from typing import Dict, List
 
 from src.adapters.models import ForecastBaseClient
-from src.dtos import ForecastDTO
 
 
 class OpenMeteoClient(ForecastBaseClient):
@@ -14,9 +14,15 @@ class OpenMeteoClient(ForecastBaseClient):
         self.base_url = base_url
 
     def get_forecast_data(
-            self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
-    ) -> ForecastDTO:
-        response = requests.get(self.base_url + "?latitude=52.52&longitude=13.41&hourly=temperature_2m")
+            self, target_timestamp: datetime.datetime, extra_params: str, wind_params: List, lon: str, lat: str
+    ) -> Dict:
+        params = {
+            "latitude": lat,
+            "longitude": lon,
+            "forecast_days": 7,
+            "hourly": ",".join(wind_params)
+        }
+        response = requests.get(self.base_url, params=params)
         if response.status_code != HTTPStatus.OK:
             raise Exception(f'External call failed. Msg: {response.status_code} - {response.reason}')
-        return ForecastDTO(response.json()["hourly"]["temperature_2m"][0])
+        return response.json()["hourly"]

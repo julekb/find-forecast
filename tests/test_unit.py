@@ -5,8 +5,8 @@ import pytest
 
 from src.adapters.windycom.client import WindyComClient
 from src.adapters.openmeteo.client import OpenMeteoClient
-from src.services import WindyComExternalService, ForecastService
-from src.domain import Location, Forecast, ConditionsDataPoint
+from src.services import WindyComExternalService, OpenMeteoExternalService, ForecastService
+from src.domain import Location, Forecast, ConditionsDataPoint, ForecastParams, WindParams
 from src.dtos import ForecastDTO
 
 
@@ -45,10 +45,10 @@ class TestCase:
         params = "t_2m:C"
 
         forecast = client.get_forecast_data(
-            target_timestamp=yesterday, extra_params=params, lon=lon, lat=lat
+            target_timestamp=yesterday, extra_params=params, wind_params=[], lon=lon, lat=lat
         )
 
-        assert isinstance(forecast, ForecastDTO)
+        assert isinstance(forecast, dict)
 
     def test_service(self, windycom_client):
         client = windycom_client
@@ -63,6 +63,18 @@ class TestCase:
             target_timestamp=yesterday, extra_params=params, lon=lon, lat=lat
         )
         assert isinstance(forecast, ConditionsDataPoint)
+
+    def test_openmeteo_service(self, openmeteo_client):
+        client = openmeteo_client
+        service = OpenMeteoExternalService(client=client)
+        forecast_params = ForecastParams(
+            target_timestamp=datetime.utcnow(),
+            location=Location(lon="13.461804", lat="52.520551", name="test location"),
+            wind=[WindParams.WIND_SPEED, WindParams.WIND_DIRECTION],
+        )
+
+        forecast = service.get_forecast(forecast_params=forecast_params)
+        assert isinstance(forecast, dict)
 
     def test_forecast_service(self, windycom_client):
         client = windycom_client
