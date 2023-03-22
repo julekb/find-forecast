@@ -4,6 +4,8 @@ import abc
 from dataclasses import dataclass, InitVar, field
 from datetime import datetime
 
+import pandas as pd
+
 
 class BaseDomainModel(abc.ABC):
     """Abstract base domain class."""
@@ -34,17 +36,12 @@ class ForecastParams(BaseDomainModel):
 
 
 @dataclass(frozen=True)
-class ConditionsDataPoint(BaseDomainModel):
-    wind_speed: float
-
-
-@dataclass(frozen=True)
 class Forecast(BaseDomainModel):
     """Forecast domain model represents a forecast for a location for a given time interval."""
     #: A timestamp when the forecast was created.
     created_at: datetime
     #: A timestamp when the forecast is valid.
     valid_at: datetime
-
-    data: List[Dict[datetime, ConditionsDataPoint]]
+    #: Pandas DataFrame containing forecast data.
+    data: pd.DataFrame
 

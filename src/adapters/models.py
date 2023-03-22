@@ -3,9 +3,6 @@ import datetime
 from typing import Dict, List
 
 
-from src.dtos import ForecastDTO
-
-
 class ForecastBaseClient(abc.ABC):
     """Abstract base client class."""
     def __init__(self, config: Dict, *args, **kwargs):
@@ -19,5 +16,5 @@ class ForecastBaseClient(abc.ABC):
     @abc.abstractmethod
     def get_forecast_data(
             self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str, wind_params: List
-    ) -> ForecastDTO:
+    ) -> Dict:
         """Get forcast data."""

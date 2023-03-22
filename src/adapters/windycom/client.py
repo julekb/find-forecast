@@ -3,9 +3,9 @@ from requests.auth import HTTPBasicAuth
 import os
 import datetime
 import requests
+from typing import Dict
 
 from src.adapters.models import ForecastBaseClient
-from src.dtos import ForecastDTO
 
 
 class WindyComClient(ForecastBaseClient):
@@ -21,10 +21,10 @@ class WindyComClient(ForecastBaseClient):
 
     def get_forecast_data(
             self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
-    ) -> ForecastDTO:
+    ) -> Dict:
         response = requests.get(
             f"{self.base_url}/{str(target_timestamp.date())}T00:00:00Z/{extra_params}/{lon},{lat}/json",
             auth=HTTPBasicAuth(self.user, self.password))
         if response.status_code != HTTPStatus.OK:
             raise Exception(f'External call failed. Msg: {response.status_code} - {response.reason}')
-        return ForecastDTO(response.json()["data"][0]["coordinates"][0]["dates"][0]["value"])
+        return response.json()["data"][0]["coordinates"][0]["dates"][0]["value"]

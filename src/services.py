@@ -5,8 +5,10 @@ import datetime
 
 
 from src.adapters.models import ForecastBaseClient
-from src.domain import Location, Forecast, ConditionsDataPoint, WindParams, ForecastParams
+from src.domain import Location, Forecast, WindParams, ForecastParams
 from src.utils import create_bijection_dict
+
+import pandas as pd
 
 
 @dataclass(frozen=True)
@@ -39,12 +41,13 @@ class WindyComExternalService(ExternalBaseService):
 
     def get_forecast(
             self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
-    ) -> ConditionsDataPoint:
+    ) -> Forecast:
         """Get forecast data from external service."""
-        forecast_dto = self.client.get_forecast_data(
+        forecast_raw = self.client.get_forecast_data(
             target_timestamp=target_timestamp, extra_params=extra_params, lon=lon, lat=lat
         )
-        forecast = ConditionsDataPoint(forecast_dto.value)
+        data = pd.DataFrame.from_dict({"value": [forecast_raw]})
+        forecast = Forecast(created_at=datetime.datetime.now(), valid_at=datetime.datetime.now(), data=data)
 
         return forecast
 
@@ -60,7 +63,8 @@ class OpenMeteoExternalService(ExternalBaseService):
         self.client = client
 
     def get_forecast(
-            self, forecast_params: ForecastParams) -> Forecast:
+            self, forecast_params: ForecastParams
+    ) -> Forecast:
         forecast_raw = self.client.get_forecast_data(
             target_timestamp=forecast_params.target_timestamp,
             extra_params="",
@@ -68,7 +72,10 @@ class OpenMeteoExternalService(ExternalBaseService):
             lon=forecast_params.location.lon,
             lat=forecast_params.location.lat
         )
-        return forecast_raw
+        data = pd.DataFrame.from_dict(forecast_raw)
+        data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
+        forecast = Forecast(created_at=datetime.datetime.now(), valid_at=datetime.datetime.now(), data=data)
+        return forecast
 
 
 class ForecastService(BaseService):
