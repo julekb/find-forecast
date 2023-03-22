@@ -2,11 +2,10 @@ import os
 from datetime import timedelta, datetime
 import pytest
 
-
-from src.adapters.windycom.client import WindyComClient
 from src.adapters.openmeteo.client import OpenMeteoClient
-from src.services import WindyComExternalService, OpenMeteoExternalService, ForecastService
+from src.adapters.windycom.client import WindyComClient
 from src.domain import Location, Forecast, ForecastParams
+from src.services import WindyComExternalService, OpenMeteoExternalService, ForecastService
 
 import pandas as pd
 
@@ -33,7 +32,7 @@ class TestCase:
         params = "t_2m:C"
 
         forecast = client.get_forecast_data(
-            target_timestamp=yesterday, extra_params=params, lon=lon, lat=lat
+            lon=lon, lat=lat, target_timestamp=yesterday, params=params
         )
 
         assert isinstance(forecast, float)
@@ -43,10 +42,10 @@ class TestCase:
         lon = "13.461804"
         lat = "52.520551"
         yesterday = datetime.utcnow() - timedelta(days=1)
-        params = "t_2m:C"
+        params = ["temperature_2m"]
 
         forecast = client.get_forecast_data(
-            target_timestamp=yesterday, extra_params=params, wind_params=[], lon=lon, lat=lat
+            lon=lon, lat=lat, target_timestamp=yesterday, params=params
         )
 
         assert isinstance(forecast, dict)
@@ -87,4 +86,5 @@ class TestCase:
 
         forecast = service.get_forecast_for_location(location=location, target_timestamp=yesterday, extra_params=params)
 
+        assert isinstance(forecast, Forecast)
         assert isinstance(forecast, Forecast)

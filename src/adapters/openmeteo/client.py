@@ -14,13 +14,13 @@ class OpenMeteoClient(ForecastBaseClient):
         self.base_url = base_url
 
     def get_forecast_data(
-            self, target_timestamp: datetime.datetime, extra_params: str, wind_params: List, lon: str, lat: str
+        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List
     ) -> Dict:
         params = {
             "latitude": lat,
             "longitude": lon,
             "forecast_days": 7,
-            "hourly": ",".join(wind_params)
+            "hourly": ",".join(params)
         }
         response = requests.get(self.base_url, params=params)
         if response.status_code != HTTPStatus.OK:

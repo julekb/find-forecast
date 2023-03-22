@@ -3,7 +3,6 @@ from typing import List
 import abc
 import datetime
 
-
 from src.adapters.models import ForecastBaseClient
 from src.domain import Location, Forecast, ForecastParams
 from src.utils import create_bijection_dict, InjectionDict
@@ -70,7 +69,10 @@ class WindyComExternalService(ExternalBaseService):
     ) -> Forecast:
         """Get forecast data from external service."""
         forecast_raw = self.client.get_forecast_data(
-            lon=location.lon, lat=location.lat, target_timestamp=target_timestamp, extra_params=extra_params
+            lon=location.lon,
+            lat=location.lat,
+            target_timestamp=target_timestamp,
+            params=extra_params
         )
         data = pd.DataFrame.from_dict({"value": [forecast_raw]})
         forecast = Forecast(created_at=datetime.datetime.now(), valid_at=datetime.datetime.now(), data=data)
@@ -102,8 +104,7 @@ class OpenMeteoExternalService(ExternalBaseService):
             lon=location.lon,
             lat=location.lat,
             target_timestamp=target_timestamp,
-            extra_params="",
-            wind_params=self.translate_to_query_params(params)
+            params=self.translate_to_query_params(params)
         )
         data = pd.DataFrame.from_dict(forecast_raw)
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)

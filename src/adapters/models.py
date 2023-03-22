@@ -15,6 +15,6 @@ class ForecastBaseClient(abc.ABC):
 
     @abc.abstractmethod
     def get_forecast_data(
-            self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str, wind_params: List
+            self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List[str]
     ) -> Dict:
         """Get forcast data."""
