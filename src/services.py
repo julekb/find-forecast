@@ -5,8 +5,8 @@ import datetime
 
 
 from src.adapters.models import ForecastBaseClient
-from src.domain import Location, Forecast, WindParams, ForecastParams
-from src.utils import create_bijection_dict
+from src.domain import Location, Forecast, ForecastParams
+from src.utils import create_bijection_dict, InjectionDict
 
 import pandas as pd
 
@@ -23,7 +23,28 @@ class BaseService(abc.ABC):
 class ExternalBaseService(BaseService):
     """Base abstract service."""
 
+    #: Service name.
     name: str
+    #: Bijective domain-query params mapping.
+    DOMAIN_TO_QUERY_PARAMS_MAP: InjectionDict
+
+    def translate_to_query_params(self, params: List) -> List:
+        """
+        Translate domain forecast params into query params for a client.
+
+        :param params: Domain forecast params.
+        :return: Query params.
+        """
+        return [self.DOMAIN_TO_QUERY_PARAMS_MAP[param] for param in params]
+
+    def translate_to_domain_params(self, params: List) -> List:
+        """
+        Translate query params for a client into domain forecast params.
+
+        :param params: Query params.
+        :return: Domain forecast params.
+        """
+        return [self.DOMAIN_TO_QUERY_PARAMS_MAP.backward[param] for param in params]
 
     @abc.abstractmethod
     def get_forecast(
@@ -34,7 +55,12 @@ class ExternalBaseService(BaseService):
 
 class WindyComExternalService(ExternalBaseService):
     """External forecast service for windy.com."""
+    #: Service name.
     name = "WindyComExternalService"
+    #: Bijective domain-query params mapping.
+    DOMAIN_TO_QUERY_PARAMS_MAP = {
+        ForecastParams.TEMPERATURE: "t_2m:C"
+    }
 
     def __init__(self, client: ForecastBaseClient):
         self.client = client
@@ -53,24 +79,31 @@ class WindyComExternalService(ExternalBaseService):
 
 
 class OpenMeteoExternalService(ExternalBaseService):
+    #: Service name.
+    name = "OpenMeteoExternalService"
+    #: Bijective domain-query params mapping.
     DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict({
-        WindParams.WIND_SPEED: "windspeed_10m",
-        WindParams.WIND_DIRECTION: "winddirection_10m",
-        WindParams.WIND_GUSTS: "windgusts_10m"
+        ForecastParams.TEMPERATURE: "temperature_2m",
+        ForecastParams.WIND_SPEED: "windspeed_10m",
+        ForecastParams.WIND_DIRECTION: "winddirection_10m",
+        ForecastParams.WIND_GUSTS: "windgusts_10m"
     })
 
     def __init__(self, client: ForecastBaseClient):
         self.client = client
 
     def get_forecast(
-            self, forecast_params: ForecastParams
+        self,
+        target_timestamp: datetime.datetime,
+        location: Location,
+        params: List[ForecastParams]
     ) -> Forecast:
         forecast_raw = self.client.get_forecast_data(
-            target_timestamp=forecast_params.target_timestamp,
+            target_timestamp=target_timestamp,
             extra_params="",
-            wind_params=[self.DOMAIN_TO_QUERY_PARAMS_MAP[p] for p in forecast_params.wind],
-            lon=forecast_params.location.lon,
-            lat=forecast_params.location.lat
+            wind_params=self.translate_to_query_params(params),
+            lon=location.lon,
+            lat=location.lat
         )
         data = pd.DataFrame.from_dict(forecast_raw)
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)

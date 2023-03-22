@@ -22,17 +22,15 @@ class Location(BaseDomainModel):
     name: str
 
 
-class WindParams:
+@dataclass(frozen=True)
+class ForecastParams(BaseDomainModel):
+    # Air params
+    TEMPERATURE = "temperature"
+
+    # Wind params
     WIND_SPEED = "wind_speed"
     WIND_DIRECTION = "wind_direction"
     WIND_GUSTS = "wind_gusts"
-
-
-@dataclass(frozen=True)
-class ForecastParams(BaseDomainModel):
-    location: Location
-    wind: List
-    target_timestamp: datetime
 
 
 @dataclass(frozen=True)

@@ -6,7 +6,7 @@ import pytest
 from src.adapters.windycom.client import WindyComClient
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.services import WindyComExternalService, OpenMeteoExternalService, ForecastService
-from src.domain import Location, Forecast, ForecastParams, WindParams
+from src.domain import Location, Forecast, ForecastParams
 
 import pandas as pd
 
@@ -68,13 +68,13 @@ class TestCase:
     def test_openmeteo_service(self, openmeteo_client):
         client = openmeteo_client
         service = OpenMeteoExternalService(client=client)
-        forecast_params = ForecastParams(
+
+        forecast = service.get_forecast(
             target_timestamp=datetime.utcnow(),
             location=Location(lon="13.461804", lat="52.520551", name="test location"),
-            wind=[WindParams.WIND_SPEED, WindParams.WIND_DIRECTION],
+            params=[ForecastParams.WIND_SPEED, ForecastParams.WIND_DIRECTION, ForecastParams.TEMPERATURE]
         )
 
-        forecast = service.get_forecast(forecast_params=forecast_params)
         assert isinstance(forecast, Forecast)
         assert isinstance(forecast.data, pd.DataFrame)
 
