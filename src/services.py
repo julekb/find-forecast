@@ -48,7 +48,7 @@ class ExternalBaseService(BaseService):
 
     @abc.abstractmethod
     def get_forecast(
-            self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
+            self, location: Location, target_timestamp: datetime.datetime, extra_params: str
     ) -> Forecast:
         """Get forecast data from external service."""
 
@@ -66,11 +66,11 @@ class WindyComExternalService(ExternalBaseService):
         self.client = client
 
     def get_forecast(
-            self, target_timestamp: datetime.datetime, extra_params: str, lon: str, lat: str
+            self, location: Location, target_timestamp: datetime.datetime, extra_params: str
     ) -> Forecast:
         """Get forecast data from external service."""
         forecast_raw = self.client.get_forecast_data(
-            target_timestamp=target_timestamp, extra_params=extra_params, lon=lon, lat=lat
+            lon=location.lon, lat=location.lat, target_timestamp=target_timestamp, extra_params=extra_params
         )
         data = pd.DataFrame.from_dict({"value": [forecast_raw]})
         forecast = Forecast(created_at=datetime.datetime.now(), valid_at=datetime.datetime.now(), data=data)
@@ -99,11 +99,11 @@ class OpenMeteoExternalService(ExternalBaseService):
         params: List[ForecastParams]
     ) -> Forecast:
         forecast_raw = self.client.get_forecast_data(
+            lon=location.lon,
+            lat=location.lat,
             target_timestamp=target_timestamp,
             extra_params="",
-            wind_params=self.translate_to_query_params(params),
-            lon=location.lon,
-            lat=location.lat
+            wind_params=self.translate_to_query_params(params)
         )
         data = pd.DataFrame.from_dict(forecast_raw)
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
@@ -129,12 +129,12 @@ class ForecastService(BaseService):
         """Get forecast service for a location."""
         external_service = self.get_external_service(self._external_services_names[0])
         cdp = external_service.get_forecast(
-            target_timestamp=target_timestamp, extra_params=extra_params, lon=location.lon, lat=location.lat
+            location=location, target_timestamp=target_timestamp, extra_params=extra_params
         )
 
         forecast = Forecast(
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
-            data=[cdp]
+            data=pd.DataFrame([cdp])
         )
         return forecast

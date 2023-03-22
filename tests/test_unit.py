@@ -55,13 +55,12 @@ class TestCase:
         client = windycom_client
         service = WindyComExternalService(client=client)
 
-        lon = "13.461804"
-        lat = "52.520551"
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = "t_2m:C"
+        location = Location(name="Some location", lon="13.461804", lat = "52.520551")
 
         forecast = service.get_forecast(
-            target_timestamp=yesterday, extra_params=params, lon=lon, lat=lat
+            location=location, target_timestamp=yesterday, extra_params=params
         )
         assert isinstance(forecast, Forecast)
 
