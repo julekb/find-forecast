@@ -53,7 +53,7 @@ class ExternalBaseService(BaseService):
 
 
 class WindyComExternalService(ExternalBaseService):
-    """External forecast service for windy.com."""
+    """External forecast service implementation for windy.com."""
     #: Service name.
     name = "WindyComExternalService"
     #: Bijective domain-query params mapping.
@@ -81,6 +81,7 @@ class WindyComExternalService(ExternalBaseService):
 
 
 class OpenMeteoExternalService(ExternalBaseService):
+    """External forecast service implementation for Open-Meteo."""
     #: Service name.
     name = "OpenMeteoExternalService"
     #: Bijective domain-query params mapping.
@@ -113,7 +114,7 @@ class OpenMeteoExternalService(ExternalBaseService):
 
 
 class ForecastService(BaseService):
-    """Forecast service."""
+    """Forecast service implementation."""
     def __init__(self, external_services):
         self._external_services = {service.name: service for service in external_services}
 

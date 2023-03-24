@@ -8,6 +8,7 @@ from src.adapters.models import ForecastBaseClient
 
 
 class OpenMeteoClient(ForecastBaseClient):
+    """Open-Meteo API client."""
     base_url: str
 
     def __init_service__(self, base_url=os.environ["OPENMETEO_API_URL"]):
