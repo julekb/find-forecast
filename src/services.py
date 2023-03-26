@@ -75,7 +75,12 @@ class WindyComExternalService(ExternalBaseService):
             params=extra_params
         )
         data = pd.DataFrame.from_dict({"value": [forecast_raw]})
-        forecast = Forecast(created_at=datetime.datetime.now(), valid_at=datetime.datetime.now(), data=data)
+        forecast = Forecast(
+            created_at=datetime.datetime.now(),
+            valid_at=datetime.datetime.now(),
+            data=data,
+            location=location
+        )
 
         return forecast
 
@@ -109,7 +114,13 @@ class OpenMeteoExternalService(ExternalBaseService):
         )
         data = pd.DataFrame.from_dict(forecast_raw)
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
-        forecast = Forecast(created_at=datetime.datetime.now(), valid_at=datetime.datetime.now(), data=data)
+        forecast = Forecast(
+            created_at=datetime.datetime.now(),
+            valid_at=datetime.datetime.now(),
+            data=data,
+            location=location
+        )
+
         return forecast
 
 
@@ -137,6 +148,7 @@ class ForecastService(BaseService):
         forecast = Forecast(
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
-            data=pd.DataFrame([cdp])
+            data=pd.DataFrame([cdp]),
+            location=location
         )
         return forecast

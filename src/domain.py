@@ -1,6 +1,7 @@
 import abc
+from typing import Union
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 import pandas as pd
@@ -35,7 +36,7 @@ class ForecastParams(BaseDomainModel):
     WIND_GUSTS = "wind_gusts"
 
 
-@dataclass(frozen=True)
+@dataclass
 class Forecast(BaseDomainModel):
     """
     Forecast domain model represents a forecast for a location for a given time interval.
@@ -54,3 +55,24 @@ class Forecast(BaseDomainModel):
     data: pd.DataFrame
     #: Location for the forecast.
     location: Location
+    #: Unique identifier.  TODO: this is just so ugly that it has to be at the end.
+    id: Union[id, None] = None
+
+    def __eq__(self, other):
+        """
+        data property is a DataFrame object that needs special treatment.
+        TODO: This can be implemented smarter.
+
+        :param other: Other element to compare with.
+        :return: True if equal, false otherwise
+        """
+        if not isinstance(other, Forecast):
+            return False
+        return (
+            self.id == other.id
+            and self.created_at == other.created_at
+            and self.valid_at == other.valid_at
+            and all(self.data == other.data)
+            and self.location == other.location
+        )
+

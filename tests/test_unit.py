@@ -1,11 +1,15 @@
 import os
 from datetime import timedelta, datetime
 import pytest
+import shutil
+from random import randint
+import pickle as pkl
 
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.adapters.windycom.client import WindyComClient
 from src.domain import Location, Forecast, ForecastParams
 from src.services import WindyComExternalService, OpenMeteoExternalService, ForecastService
+from src.repositories import PklRepository
 
 import pandas as pd
 
@@ -88,3 +92,52 @@ class TestCase:
 
         assert isinstance(forecast, Forecast)
         assert isinstance(forecast, Forecast)
+
+
+class TestCaseRepository:
+
+    BASE_DIR = "_test/"
+    STORAGE_DIR = "storage/"
+
+    def _forecast(self, fid):
+        obj = Forecast(
+            id=fid,
+            created_at=datetime.now(),
+            valid_at=datetime.now(),
+            location=Location(name="A location", lon="11.22", lat="22.11"),
+            data=pd.DataFrame({ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]})
+        )
+        return obj
+
+    @pytest.fixture()
+    def forecast(self):
+        return self._forecast(randint(1, 10000))
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown(self):
+        os.makedirs(self.BASE_DIR + self.STORAGE_DIR)
+
+        # run the test
+        yield
+
+        shutil.rmtree(self.BASE_DIR)
+
+    def test_repository_save_forecast(self, forecast):
+        repository = PklRepository(base_dir=self.BASE_DIR + self.STORAGE_DIR)
+
+        repository.save_forecast(forecast)
+
+        assert os.path.isfile("_test/storage/forecast_1.pkl")
+
+    def test_repository_retrieve_forecast(self, forecast):
+        repository = PklRepository(base_dir="_test/storage")
+        with open(f"{self.BASE_DIR}{self.STORAGE_DIR}forecast_{str(forecast.id)}.pkl", "wb") as f:
+            pkl.dump(forecast, f)
+
+        retrieved = repository.retrieve_forecast_by_id(id=forecast.id)
+
+        assert retrieved == forecast
+
+
+
+
