@@ -55,10 +55,14 @@ class Forecast(BaseDomainModel):
     data: pd.DataFrame
     #: Location for the forecast.
     location: Location
-    #: Unique identifier.  TODO: this is just so ugly that it has to be at the end.
     id: Union[id, None] = None
 
-    def __eq__(self, other):
+    def set_id(self, identifier: int) -> None:
+        if self.id:
+            raise
+        self.id = identifier
+
+    def __eq__(self, other: "Forecast") -> bool:
         """
         data property is a DataFrame object that needs special treatment.
         TODO: This can be implemented smarter.

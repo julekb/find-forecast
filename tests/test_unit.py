@@ -111,6 +111,10 @@ class TestCaseRepository:
 
     @pytest.fixture()
     def forecast(self):
+        return self._forecast(None)
+
+    @pytest.fixture()
+    def forecast_with_id(self):
         return self._forecast(randint(1, 10000))
 
     @pytest.fixture(autouse=True)
@@ -125,9 +129,10 @@ class TestCaseRepository:
     def test_repository_save_forecast(self, forecast):
         repository = PklRepository(base_dir=self.BASE_DIR + self.STORAGE_DIR)
 
-        repository.save_forecast(forecast)
+        saved_forecast = repository.save_forecast(forecast)
 
         assert os.path.isfile("_test/storage/forecast_1.pkl")
+        assert saved_forecast.id == 1
 
     def test_repository_retrieve_forecast(self, forecast):
         repository = PklRepository(base_dir="_test/storage")
@@ -137,6 +142,17 @@ class TestCaseRepository:
         retrieved = repository.retrieve_forecast_by_id(id=forecast.id)
 
         assert retrieved == forecast
+
+    def test_repository_get_last_forecast_id(self, forecast):
+        repository = PklRepository(base_dir="_test/storage")
+        with open(f"{self.BASE_DIR}{self.STORAGE_DIR}forecast_1.pkl", "wb") as f:
+            pkl.dump("", f)
+        with open(f"{self.BASE_DIR}{self.STORAGE_DIR}forecast_2.pkl", "wb") as f:
+            pkl.dump("", f)
+        with open(f"{self.BASE_DIR}{self.STORAGE_DIR}notforcast_1.pkl", "wb") as f:
+            pkl.dump("", f)
+        max_id = repository._get_last_forecast_id()
+        assert max_id == 2
 
 
 

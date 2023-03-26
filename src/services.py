@@ -126,10 +126,10 @@ class OpenMeteoExternalService(ExternalBaseService):
 
 class ForecastService(BaseService):
     """Forecast service implementation."""
-    def __init__(self, external_services):
+    def __init__(self, external_services: ExternalBaseService):
         self._external_services = {service.name: service for service in external_services}
 
-    def get_external_service(self, service_name: str):
+    def get_external_service(self, service_name: str) -> ExternalBaseService:
         """Get an external service implementation."""
         return self._external_services.get(service_name)
 
