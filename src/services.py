@@ -4,7 +4,7 @@ import abc
 import datetime
 
 from src.adapters.models import ForecastBaseClient
-from src.domain import Location, Forecast, ForecastParams
+from src.domain import Location, Forecast, ForecastParams, WeatherModels
 from src.utils import create_bijection_dict, InjectionDict
 
 import pandas as pd
@@ -26,6 +26,8 @@ class ExternalBaseService(BaseService):
     name: str
     #: Bijective domain-query params mapping.
     DOMAIN_TO_QUERY_PARAMS_MAP: InjectionDict
+    #: Bijective domain-query models mapping.
+    DOMAIN_TO_QUERY_MODELS_MAP: InjectionDict
 
     def translate_to_query_params(self, params: List) -> List:
         """
@@ -45,9 +47,27 @@ class ExternalBaseService(BaseService):
         """
         return [self.DOMAIN_TO_QUERY_PARAMS_MAP.backward[param] for param in params]
 
+    def translate_to_query_models(self, models: List) -> List:
+        """
+        Translate domain models for a client into query forecast params.
+
+        :param models: Domain weather models.
+        :return: Query weather models.
+        """
+        return [self.DOMAIN_TO_QUERY_MODELS_MAP[model] for model in models]
+
+    def translate_to_domain_models(self, models: List) -> List:
+        """
+        Translate query models for a client into domain forecast params.
+
+        :param models: Query weather models.
+        :return: Domain weather models.
+        """
+        return [self.DOMAIN_TO_QUERY_MODELS_MAP.backward[model] for model in models]
+
     @abc.abstractmethod
     def get_forecast(
-            self, location: Location, target_timestamp: datetime.datetime, extra_params: str
+            self, location: Location, target_timestamp: datetime.datetime, extra_params: str, model: WeatherModels
     ) -> Forecast:
         """Get forecast data from external service."""
 
@@ -57,29 +77,34 @@ class WindyComExternalService(ExternalBaseService):
     #: Service name.
     name = "WindyComExternalService"
     #: Bijective domain-query params mapping.
-    DOMAIN_TO_QUERY_PARAMS_MAP = {
+    DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict({
         ForecastParams.TEMPERATURE: "t_2m:C"
-    }
+    })
+    DOMAIN_TO_QUERY_MODELS_MAP = create_bijection_dict({
+        WeatherModels.DEFAULT: "mix"
+    })
 
     def __init__(self, client: ForecastBaseClient):
         self.client = client
 
     def get_forecast(
-            self, location: Location, target_timestamp: datetime.datetime, extra_params: str
+            self, location: Location, target_timestamp: datetime.datetime, extra_params: str, model: WeatherModels
     ) -> Forecast:
         """Get forecast data from external service."""
         forecast_raw = self.client.get_forecast_data(
             lon=location.lon,
             lat=location.lat,
             target_timestamp=target_timestamp,
-            params=extra_params
+            params=extra_params,
+            model=self.translate_to_query_models([model])[0]
         )
         data = pd.DataFrame.from_dict({"value": [forecast_raw]})
         forecast = Forecast(
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
             data=data,
-            location=location
+            location=location,
+            model=model
         )
 
         return forecast
@@ -96,6 +121,9 @@ class OpenMeteoExternalService(ExternalBaseService):
         ForecastParams.WIND_DIRECTION: "winddirection_10m",
         ForecastParams.WIND_GUSTS: "windgusts_10m"
     })
+    DOMAIN_TO_QUERY_MODELS_MAP = create_bijection_dict({
+        WeatherModels.MODEL_ICON: "icon_seamless"
+    })
 
     def __init__(self, client: ForecastBaseClient):
         self.client = client
@@ -104,13 +132,15 @@ class OpenMeteoExternalService(ExternalBaseService):
         self,
         target_timestamp: datetime.datetime,
         location: Location,
-        params: List[ForecastParams]
+        params: List[ForecastParams],
+        model: WeatherModels
     ) -> Forecast:
         forecast_raw = self.client.get_forecast_data(
             lon=location.lon,
             lat=location.lat,
             target_timestamp=target_timestamp,
-            params=self.translate_to_query_params(params)
+            params=self.translate_to_query_params(params),
+            model=self.translate_to_query_models([model])[0]
         )
         data = pd.DataFrame.from_dict(forecast_raw)
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
@@ -118,7 +148,8 @@ class OpenMeteoExternalService(ExternalBaseService):
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
             data=data,
-            location=location
+            location=location,
+            model=model
         )
 
         return forecast
@@ -138,17 +169,20 @@ class ForecastService(BaseService):
         """Get an array of names of external forecast services."""
         return list(self._external_services.keys())
 
-    def get_forecast_for_location(self, location: Location, extra_params, target_timestamp) -> Forecast:
+    def get_forecast_for_location(
+            self, location: Location, extra_params, target_timestamp, model: WeatherModels
+    ) -> Forecast:
         """Get forecast service for a location."""
         external_service = self.get_external_service(self._external_services_names[0])
         cdp = external_service.get_forecast(
-            location=location, target_timestamp=target_timestamp, extra_params=extra_params
+            location=location, target_timestamp=target_timestamp, extra_params=extra_params, model=model
         )
 
         forecast = Forecast(
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
             data=pd.DataFrame([cdp]),
-            location=location
+            location=location,
+            model=model
         )
         return forecast

@@ -21,11 +21,15 @@ class WindyComClient(ForecastBaseClient):
         self.password = password
 
     def get_forecast_data(
-            self, lon: str, lat: str, target_timestamp: datetime.datetime, params: str
+            self, lon: str, lat: str, target_timestamp: datetime.datetime, params: str, model: str
     ) -> Dict:
+        qparams = {
+            "model": model
+        }
         response = requests.get(
             f"{self.base_url}/{str(target_timestamp.date())}T00:00:00Z/{params}/{lon},{lat}/json",
-            auth=HTTPBasicAuth(self.user, self.password))
+            auth=HTTPBasicAuth(self.user, self.password), params=qparams)
         if response.status_code != HTTPStatus.OK:
-            raise Exception(f'External call failed. Msg: {response.status_code} - {response.reason}')
+            raise Exception(f'External call failed. Msg: {response.status_code} - {response.text}')
+
         return response.json()["data"][0]["coordinates"][0]["dates"][0]["value"]

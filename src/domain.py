@@ -1,4 +1,5 @@
 import abc
+import enum
 from typing import Union
 
 from dataclasses import dataclass, field
@@ -27,13 +28,23 @@ class ForecastParams(BaseDomainModel):
     """
     Forecast params used to fetch a requested forecast.
     """
-    # Air params
+    # Air params:
     TEMPERATURE = "temperature"
 
-    # Wind params
+    # Wind params:
     WIND_SPEED = "wind_speed"
     WIND_DIRECTION = "wind_direction"
     WIND_GUSTS = "wind_gusts"
+
+
+class WeatherModels(enum.Enum):
+    """
+    Weather models enum.
+    """
+    #: ICON model.
+    MODEL_ICON = "icon"
+    #: Default model.
+    DEFAULT = "default"
 
 
 @dataclass
@@ -55,6 +66,9 @@ class Forecast(BaseDomainModel):
     data: pd.DataFrame
     #: Location for the forecast.
     location: Location
+    #: Weather forecast model:
+    model: WeatherModels
+    #: Identifier
     id: Union[id, None] = None
 
     def set_id(self, identifier: int) -> None:

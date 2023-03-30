@@ -15,15 +15,17 @@ class OpenMeteoClient(ForecastBaseClient):
         self.base_url = base_url
 
     def get_forecast_data(
-        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List
+        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List, model: str
     ) -> Dict:
         params = {
             "latitude": lat,
             "longitude": lon,
             "forecast_days": 7,
-            "hourly": ",".join(params)
+            "hourly": ",".join(params),
+            "models": str(model),
+            "windspeed_unit": "kn"
         }
         response = requests.get(self.base_url, params=params)
         if response.status_code != HTTPStatus.OK:
-            raise Exception(f'External call failed. Msg: {response.status_code} - {response.reason}')
+            raise Exception(f'External call failed. Msg: {response.status_code} - {response.text}')
         return response.json()["hourly"]

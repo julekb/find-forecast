@@ -7,7 +7,7 @@ import pickle as pkl
 
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.adapters.windycom.client import WindyComClient
-from src.domain import Location, Forecast, ForecastParams
+from src.domain import Location, Forecast, ForecastParams, WeatherModels
 from src.services import WindyComExternalService, OpenMeteoExternalService, ForecastService
 from src.repositories import PklRepository
 
@@ -34,9 +34,10 @@ class TestCase:
         lat = "52.520551"
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = "t_2m:C"
+        model = "mix"
 
         forecast = client.get_forecast_data(
-            lon=lon, lat=lat, target_timestamp=yesterday, params=params
+            lon=lon, lat=lat, target_timestamp=yesterday, params=params, model=model
         )
 
         assert isinstance(forecast, float)
@@ -47,9 +48,10 @@ class TestCase:
         lat = "52.520551"
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = ["temperature_2m"]
+        model = "icon_seamless"
 
         forecast = client.get_forecast_data(
-            lon=lon, lat=lat, target_timestamp=yesterday, params=params
+            lon=lon, lat=lat, target_timestamp=yesterday, params=params, model=model
         )
 
         assert isinstance(forecast, dict)
@@ -63,7 +65,7 @@ class TestCase:
         location = Location(name="Some location", lon="13.461804", lat = "52.520551")
 
         forecast = service.get_forecast(
-            location=location, target_timestamp=yesterday, extra_params=params
+            location=location, target_timestamp=yesterday, extra_params=params, model=WeatherModels.DEFAULT
         )
         assert isinstance(forecast, Forecast)
 
@@ -74,7 +76,8 @@ class TestCase:
         forecast = service.get_forecast(
             target_timestamp=datetime.utcnow(),
             location=Location(lon="13.461804", lat="52.520551", name="test location"),
-            params=[ForecastParams.WIND_SPEED, ForecastParams.WIND_DIRECTION, ForecastParams.TEMPERATURE]
+            params=[ForecastParams.WIND_SPEED, ForecastParams.WIND_DIRECTION, ForecastParams.TEMPERATURE],
+            model=WeatherModels.MODEL_ICON
         )
 
         assert isinstance(forecast, Forecast)
@@ -87,8 +90,9 @@ class TestCase:
         location = Location(name="My location", lon="53.11", lat="21.37")
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = "t_2m:C"
+        model = WeatherModels.DEFAULT
 
-        forecast = service.get_forecast_for_location(location=location, target_timestamp=yesterday, extra_params=params)
+        forecast = service.get_forecast_for_location(location=location, target_timestamp=yesterday, extra_params=params, model=model)
 
         assert isinstance(forecast, Forecast)
         assert isinstance(forecast, Forecast)
@@ -105,7 +109,8 @@ class TestCaseRepository:
             created_at=datetime.now(),
             valid_at=datetime.now(),
             location=Location(name="A location", lon="11.22", lat="22.11"),
-            data=pd.DataFrame({ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]})
+            data=pd.DataFrame({ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]}),
+            model=WeatherModels.DEFAULT
         )
         return obj
 
@@ -153,7 +158,3 @@ class TestCaseRepository:
             pkl.dump("", f)
         max_id = repository._get_last_forecast_id()
         assert max_id == 2
-
-
-
-

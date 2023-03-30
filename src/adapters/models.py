@@ -15,7 +15,7 @@ class ForecastBaseClient(abc.ABC):
 
     @abc.abstractmethod
     def get_forecast_data(
-            self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List[str]
+            self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List[str], model: str
     ) -> Dict:
         """
         Get forcast data.
@@ -24,5 +24,6 @@ class ForecastBaseClient(abc.ABC):
         :param lat: The location's latitude.
         :param target_timestamp:
         :param params: An array of requested weather parameters.
+        :param model: Weather model.
         :return: A dictionary containing the requested weather data.
         """
