@@ -12,10 +12,21 @@ jobs:
         run: |
           touch .env # .env file is required in docker-compose
           docker-compose up -d
+
+  code-style:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: Build docker containers
+        run: |
+          touch .env # .env file is required in docker-compose
+          docker-compose up -d
+      - name: Run Flake8
+        run: docker exec find-forecast_find-forecast_1 flake8
       - name: Run MyPy
         run: docker exec find-forecast_find-forecast_1 mypy .
-      - name: Run Pytest
-        run: docker exec find-forecast_find-forecast_1 pytest ../tests
+
   tests:
     runs-on: ubuntu-latest
     steps:
