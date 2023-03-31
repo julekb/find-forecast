@@ -4,6 +4,9 @@ up:
 down:
 	docker-compose down
 
+build:
+	docker-compose build
+
 rebuild:
 	docker-compose up --build --force-recreate --no-deps -d
 

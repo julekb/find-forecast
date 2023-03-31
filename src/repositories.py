@@ -55,7 +55,7 @@ class PklRepository(BaseRepository):
 
         :return: Highest Forecast identifier.
         """
-        regex = re.compile("forecast_[1-9]\d*.pkl$")
+        regex = re.compile(r"forecast_[1-9]\d*.pkl$")
 
         fnames = [file for file in os.listdir(self.BASE_DIR) if regex.match(file)]
         if not fnames:
