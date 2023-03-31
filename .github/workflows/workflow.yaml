@@ -37,6 +37,16 @@ jobs:
       - name: Build docker containers
         run: |
           touch .env # .env file is required in docker-compose
+          docker-compose build \
+            --build-arg "METEOMATICS_API_URL=$METEOMATICS_API_URL" \
+            --build-arg "METEOMATICS_USER=$METEOMATICS_USER" \
+            --build-arg "METEOMATICS_PASSWORD=$METEOMATICS_PASSWORD" \
+            --build-arg "OPENMETEO_API_URL=$OPENMETEO_API_URL" 
           docker-compose up -d
+        env:
+          METEOMATICS_API_URL: ${{ secrets.METEOMATICS_API_URL }}
+          METEOMATICS_USER: ${{ secrets.METEOMATICS_USER }}
+          METEOMATICS_PASSWORD: ${{ secrets.METEOMATICS_PASSWORD }}
+          OPENMETEO_API_URL: ${{ secrets.OPENMETEO_API_URL }}
       - name: Run Pytest
         run: docker exec find-forecast_find-forecast_1 pytest ../tests
