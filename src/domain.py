@@ -2,7 +2,7 @@ import abc
 import enum
 from typing import Union
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 
 import pandas as pd
@@ -15,6 +15,7 @@ class BaseDomainModel(abc.ABC):
 @dataclass(frozen=True)
 class Location(BaseDomainModel):
     """Location domain model."""
+
     #: Location's longitude.
     lon: str
     #: Location's latitude.
@@ -28,6 +29,7 @@ class ForecastParams(BaseDomainModel):
     """
     Forecast params used to fetch a requested forecast.
     """
+
     # Air params:
     TEMPERATURE = "temperature"
 
@@ -41,6 +43,7 @@ class WeatherModels(enum.Enum):
     """
     Weather models enum.
     """
+
     #: ICON model.
     MODEL_ICON = "icon"
     #: Default model.
@@ -69,14 +72,14 @@ class Forecast(BaseDomainModel):
     #: Weather forecast model:
     model: WeatherModels
     #: Identifier
-    id: Union[id, None] = None
+    id: Union[int, None] = None
 
     def set_id(self, identifier: int) -> None:
         if self.id:
             raise
         self.id = identifier
 
-    def __eq__(self, other: "Forecast") -> bool:
+    def __eq__(self, other: "object") -> bool:
         """
         data property is a DataFrame object that needs special treatment.
         TODO: This can be implemented smarter.
@@ -93,4 +96,3 @@ class Forecast(BaseDomainModel):
             and all(self.data == other.data)
             and self.location == other.location
         )
-

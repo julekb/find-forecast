@@ -5,6 +5,7 @@ from typing import Dict, List
 
 class ForecastBaseClient(abc.ABC):
     """Abstract base client class."""
+
     def __init__(self, config: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__init_service__(**config)
@@ -15,7 +16,7 @@ class ForecastBaseClient(abc.ABC):
 
     @abc.abstractmethod
     def get_forecast_data(
-            self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List[str], model: str
+        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List, model: str
     ) -> Dict:
         """
         Get forcast data.

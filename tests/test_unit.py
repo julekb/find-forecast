@@ -19,7 +19,7 @@ class TestCase:
     def windycom_client(self):
         config = {
             "user": os.environ["METEOMATICS_USER"],
-            "password": os.environ["METEOMATICS_PASSWORD"]
+            "password": os.environ["METEOMATICS_PASSWORD"],
         }
         return WindyComClient(config=config)
 
@@ -33,7 +33,7 @@ class TestCase:
         lon = "13.461804"
         lat = "52.520551"
         yesterday = datetime.utcnow() - timedelta(days=1)
-        params = "t_2m:C"
+        params = ["t_2m:C"]
         model = "mix"
 
         forecast = client.get_forecast_data(
@@ -61,23 +61,31 @@ class TestCase:
         service = WindyComExternalService(client=client)
 
         yesterday = datetime.utcnow() - timedelta(days=1)
-        params = "t_2m:C"
-        location = Location(name="Some location", lon="13.461804", lat = "52.520551")
+        params = [ForecastParams.TEMPERATURE]
+        location = Location(name="Some location", lon="13.461804", lat="52.520551")
 
         forecast = service.get_forecast(
-            location=location, target_timestamp=yesterday, extra_params=params, model=WeatherModels.DEFAULT
+            location=location,
+            target_timestamp=yesterday,
+            extra_params=params,
+            model=WeatherModels.DEFAULT,
         )
         assert isinstance(forecast, Forecast)
 
     def test_openmeteo_service(self, openmeteo_client):
         client = openmeteo_client
         service = OpenMeteoExternalService(client=client)
+        params = [
+                ForecastParams.WIND_SPEED,
+                ForecastParams.WIND_DIRECTION,
+                ForecastParams.TEMPERATURE
+            ]
 
         forecast = service.get_forecast(
             target_timestamp=datetime.utcnow(),
             location=Location(lon="13.461804", lat="52.520551", name="test location"),
-            params=[ForecastParams.WIND_SPEED, ForecastParams.WIND_DIRECTION, ForecastParams.TEMPERATURE],
-            model=WeatherModels.MODEL_ICON
+            extra_params=params,
+            model=WeatherModels.MODEL_ICON,
         )
 
         assert isinstance(forecast, Forecast)
@@ -89,17 +97,18 @@ class TestCase:
         service = ForecastService(external_services=[external_service])
         location = Location(name="My location", lon="53.11", lat="21.37")
         yesterday = datetime.utcnow() - timedelta(days=1)
-        params = "t_2m:C"
+        params = [ForecastParams.TEMPERATURE]
         model = WeatherModels.DEFAULT
 
-        forecast = service.get_forecast_for_location(location=location, target_timestamp=yesterday, extra_params=params, model=model)
+        forecast = service.get_forecast_for_location(
+            location=location, target_timestamp=yesterday, extra_params=params, model=model
+        )
 
         assert isinstance(forecast, Forecast)
         assert isinstance(forecast, Forecast)
 
 
 class TestCaseRepository:
-
     BASE_DIR = "_test/"
     STORAGE_DIR = "storage/"
 
@@ -109,8 +118,10 @@ class TestCaseRepository:
             created_at=datetime.now(),
             valid_at=datetime.now(),
             location=Location(name="A location", lon="11.22", lat="22.11"),
-            data=pd.DataFrame({ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]}),
-            model=WeatherModels.DEFAULT
+            data=pd.DataFrame(
+                {ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]}
+            ),
+            model=WeatherModels.DEFAULT,
         )
         return obj
 

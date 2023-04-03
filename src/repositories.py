@@ -48,7 +48,7 @@ class PklRepository(BaseRepository):
             raise
         return forecast
 
-    def _get_last_forecast_id(self) -> id:
+    def _get_last_forecast_id(self) -> int:
         """
         Search for all records in the storage and return the identifier
         of with the highest value existing.
