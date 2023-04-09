@@ -6,6 +6,7 @@ import datetime
 from src.adapters.models import ForecastBaseClient
 from src.domain import Location, Forecast, ForecastParams, WeatherModels
 from src.utils import create_bijection_dict, InjectionDict
+from src.services.common import BaseService
 
 import pandas as pd
 
@@ -13,10 +14,6 @@ import pandas as pd
 @dataclass(frozen=True)
 class ForecastData:
     value: str
-
-
-class BaseService(abc.ABC):
-    """Abstract base service class."""
 
 
 class ExternalBaseService(BaseService):

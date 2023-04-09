@@ -8,7 +8,11 @@ import pickle as pkl
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.adapters.windycom.client import WindyComClient
 from src.domain import Location, Forecast, ForecastParams, WeatherModels
-from src.services import WindyComExternalService, OpenMeteoExternalService, ForecastService
+from src.services.forecast_services import (
+    WindyComExternalService,
+    OpenMeteoExternalService,
+    ForecastService,
+)
 from src.repositories import PklRepository
 
 import pandas as pd
@@ -76,10 +80,10 @@ class TestCase:
         client = openmeteo_client
         service = OpenMeteoExternalService(client=client)
         params = [
-                ForecastParams.WIND_SPEED,
-                ForecastParams.WIND_DIRECTION,
-                ForecastParams.TEMPERATURE
-            ]
+            ForecastParams.WIND_SPEED,
+            ForecastParams.WIND_DIRECTION,
+            ForecastParams.TEMPERATURE,
+        ]
 
         forecast = service.get_forecast(
             target_timestamp=datetime.utcnow(),

@@ -3,16 +3,20 @@ import datetime
 from typing import Dict, List
 
 
-class ForecastBaseClient(abc.ABC):
+class BaseClient(abc.ABC):
     """Abstract base client class."""
 
     def __init__(self, config: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__init_service__(**config)
+        self.__init_client__(**config)
 
     @abc.abstractmethod
-    def __init_service__(self, *args, **kwargs):
-        """Initialize service-specific entities."""
+    def __init_client__(self, *args, **kwargs):
+        """Initialize client-specific entities."""
+
+
+class ForecastBaseClient(BaseClient):
+    """Abstract base forecast client class."""
 
     @abc.abstractmethod
     def get_forecast_data(
@@ -28,3 +32,12 @@ class ForecastBaseClient(abc.ABC):
         :param model: Weather model.
         :return: A dictionary containing the requested weather data.
         """
+
+
+class WeatherBaseClient(BaseClient):
+    """Abstract base weather log client class."""
+
+    @abc.abstractmethod
+    def get_weather_data(self):
+        """Get weather data."""
+        pass

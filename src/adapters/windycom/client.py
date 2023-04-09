@@ -15,7 +15,7 @@ class WindyComClient(ForecastBaseClient):
     user: str
     password: str
 
-    def __init_service__(self, user, password, base_url=os.environ["METEOMATICS_API_URL"]):
+    def __init_client__(self, user, password, base_url=os.environ["METEOMATICS_API_URL"]):
         self.base_url = base_url
         # this is not safe
         self.user = user

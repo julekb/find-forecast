@@ -12,7 +12,7 @@ class OpenMeteoClient(ForecastBaseClient):
 
     base_url: str
 
-    def __init_service__(self, base_url=os.environ["OPENMETEO_API_URL"]):
+    def __init_client__(self, base_url=os.environ["OPENMETEO_API_URL"]):
         self.base_url = base_url
 
     def get_forecast_data(
