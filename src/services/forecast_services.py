@@ -106,7 +106,7 @@ class WindyComExternalService(ExternalBaseService):
             valid_at=datetime.datetime.now(),
             data=data,
             location=location,
-            model=model,
+            weather_model=model,
         )
 
         return forecast
@@ -152,7 +152,7 @@ class OpenMeteoExternalService(ExternalBaseService):
             valid_at=datetime.datetime.now(),
             data=data,
             location=location,
-            model=model,
+            weather_model=model,
         )
 
         return forecast
@@ -192,6 +192,6 @@ class ForecastService(BaseService):
             valid_at=datetime.datetime.now(),
             data=pd.DataFrame([cdp]),
             location=location,
-            model=model,
+            weather_model=model,
         )
         return forecast

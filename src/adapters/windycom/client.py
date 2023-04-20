@@ -24,12 +24,12 @@ class WindyComClient(ForecastBaseClient):
     def get_forecast_data(
         self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List, model: str
     ) -> Dict:
-        qparams = {"model": model}
+        query_params = {"model": model}
         date = str(target_timestamp.date())
         response = requests.get(
             f"{self.base_url}/{date}T00:00:00Z/{','.join(params)}/{lon},{lat}/json",
             auth=HTTPBasicAuth(self.user, self.password),
-            params=qparams,
+            params=query_params,
         )
         if response.status_code != HTTPStatus.OK:
             raise Exception(f"External call failed. Msg: {response.status_code} - {response.text}")

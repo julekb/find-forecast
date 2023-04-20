@@ -34,7 +34,7 @@ class PklRepository(BaseRepository):
             pkl.dump(forecast, f)
         return forecast
 
-    def retrieve_forecast_by_id(self, id: int) -> Forecast:
+    def retrieve_forecast(self, id: int) -> Forecast:
         """
         Get a Forecast object by identifier.
 
@@ -57,8 +57,8 @@ class PklRepository(BaseRepository):
         """
         regex = re.compile(r"forecast_[1-9]\d*.pkl$")
 
-        fnames = [file for file in os.listdir(self.BASE_DIR) if regex.match(file)]
-        if not fnames:
+        forecast_names = [file for file in os.listdir(self.BASE_DIR) if regex.match(file)]
+        if not forecast_names:
             return 0
-        fids = [int(fname[9:-4]) for fname in fnames]
-        return max(fids)
+        forecast_ids = [int(fname[9:-4]) for fname in forecast_names]
+        return max(forecast_ids)

@@ -51,13 +51,13 @@ class WeatherModels(enum.Enum):
 
 
 @dataclass
-class WeatherDataContainer(BaseDomainModel):
+class WeatherData(BaseDomainModel):
     #: Pandas DataFrame containing weather data.
     data: pd.DataFrame
 
 
 @dataclass
-class WeatherLog(WeatherDataContainer):
+class WeatherLog(WeatherData):
     """Weather data log."""
 
     # Source of the weather information.
@@ -65,7 +65,7 @@ class WeatherLog(WeatherDataContainer):
 
 
 @dataclass
-class Forecast(WeatherDataContainer):
+class Forecast(WeatherData):
     """
     Forecast domain model represents a forecast for a location for a given time interval.
 
@@ -82,7 +82,7 @@ class Forecast(WeatherDataContainer):
     #: Location for the forecast.
     location: Location
     #: Weather forecast model:
-    model: WeatherModels
+    weather_model: WeatherModels
     #: Identifier
     id: Union[int, None] = None
 
@@ -91,7 +91,7 @@ class Forecast(WeatherDataContainer):
             raise
         self.id = identifier
 
-    def __eq__(self, other: "object") -> bool:
+    def __eq__(self, other: "Forecast") -> bool:
         """
         data property is a DataFrame object that needs special treatment.
         TODO: This can be implemented smarter.
@@ -99,8 +99,6 @@ class Forecast(WeatherDataContainer):
         :param other: Other element to compare with.
         :return: True if equal, false otherwise
         """
-        if not isinstance(other, Forecast):
-            return False
         return (
             self.id == other.id
             and self.created_at == other.created_at
@@ -128,7 +126,7 @@ class ForecastAnalyzer(BaseDomainModel):
         """
         pass
 
-    def get_winning_model(self) -> WeatherModels:
+    def get_winning_weather_model(self) -> WeatherModels:
         """
         Find a winning forecasting model.
         :return:

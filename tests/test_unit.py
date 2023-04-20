@@ -125,7 +125,7 @@ class TestCaseRepository:
             data=pd.DataFrame(
                 {ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]}
             ),
-            model=WeatherModels.DEFAULT,
+            weather_model=WeatherModels.DEFAULT,
         )
         return obj
 
@@ -159,7 +159,7 @@ class TestCaseRepository:
         with open(f"{self.BASE_DIR}{self.STORAGE_DIR}forecast_{str(forecast.id)}.pkl", "wb") as f:
             pkl.dump(forecast, f)
 
-        retrieved = repository.retrieve_forecast_by_id(id=forecast.id)
+        retrieved = repository.retrieve_forecast(id=forecast.id)
 
         assert retrieved == forecast
 
