@@ -91,7 +91,7 @@ class Forecast(WeatherData):
             raise
         self.id = identifier
 
-    def __eq__(self, other: "Forecast") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         data property is a DataFrame object that needs special treatment.
         TODO: This can be implemented smarter.
@@ -99,6 +99,9 @@ class Forecast(WeatherData):
         :param other: Other element to compare with.
         :return: True if equal, false otherwise
         """
+        if not isinstance(other, Forecast):
+            return NotImplemented
+
         return (
             self.id == other.id
             and self.created_at == other.created_at
@@ -119,7 +122,7 @@ class ForecastAnalyzer(BaseDomainModel):
     results: Union[Results, None]
 
     def analyze(self, forecasts: List[Forecast], weather_log: WeatherLog) -> None:
-        """Analyze all all forecasts agains the weather log.
+        """Analyze all forecasts against the weather log.
 
         :param forecasts: An array of forecasts.
         :param weather_log: A weather log.

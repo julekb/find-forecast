@@ -17,6 +17,11 @@ class PklRepository(BaseRepository):
     def __init__(self, base_dir: str = "storage/pkl_repo"):
         self.BASE_DIR = base_dir
 
+    def _save_forecast(self, forecast: Forecast):
+        with open(f"{self.BASE_DIR}/forecast_{forecast.id}.pkl", "wb") as f:
+            pkl.dump(forecast, f)
+        return forecast
+
     def save_forecast(self, forecast: Forecast) -> Forecast:
         """
         If an object does not have id value, a new value is set,
@@ -28,25 +33,28 @@ class PklRepository(BaseRepository):
         """
         if forecast.id:
             raise
+
         next_id = self._get_last_forecast_id() + 1
         forecast.set_id(next_id)
-        with open(f"{self.BASE_DIR}/forecast_1.pkl", "wb") as f:  # TODO: generate_ids
-            pkl.dump(forecast, f)
+        return self._save_forecast(forecast)
+
+    def _retrieve_forecast(self, forecast_id: int):
+        with open(f"{self.BASE_DIR}/forecast_{str(forecast_id)}.pkl", "rb") as f:
+            try:
+                forecast = pkl.load(f)
+            except FileNotFoundError:
+                raise
         return forecast
 
-    def retrieve_forecast(self, id: int) -> Forecast:
+    def retrieve_forecast(self, forecast_id: int) -> Forecast:
         """
         Get a Forecast object by identifier.
 
-        :param id: The Forecast identifier.
+        :param forecast_id: The Forecast identifier.
         :return: The Forecast object.
         """
-        try:
-            with open(f"{self.BASE_DIR}/forecast_{str(id)}.pkl", "rb") as f:
-                forecast = pkl.load(f)
-        except FileNotFoundError:
-            raise
-        return forecast
+
+        return self._retrieve_forecast(forecast_id)
 
     def _get_last_forecast_id(self) -> int:
         """

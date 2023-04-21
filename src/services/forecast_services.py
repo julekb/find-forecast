@@ -187,11 +187,10 @@ class ForecastService(BaseService):
             model=model,
         )
 
-        forecast = Forecast(
+        return Forecast(
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
             data=pd.DataFrame([cdp]),
             location=location,
             weather_model=model,
         )
-        return forecast

@@ -74,6 +74,7 @@ class TestCase:
             extra_params=params,
             model=WeatherModels.DEFAULT,
         )
+
         assert isinstance(forecast, Forecast)
 
     def test_openmeteo_service(self, openmeteo_client):
@@ -159,7 +160,7 @@ class TestCaseRepository:
         with open(f"{self.BASE_DIR}{self.STORAGE_DIR}forecast_{str(forecast.id)}.pkl", "wb") as f:
             pkl.dump(forecast, f)
 
-        retrieved = repository.retrieve_forecast(id=forecast.id)
+        retrieved = repository.retrieve_forecast(forecast.id)
 
         assert retrieved == forecast
 
@@ -171,5 +172,7 @@ class TestCaseRepository:
             pkl.dump("", f)
         with open(f"{self.BASE_DIR}{self.STORAGE_DIR}notforcast_1.pkl", "wb") as f:
             pkl.dump("", f)
+
         max_id = repository._get_last_forecast_id()
+
         assert max_id == 2
