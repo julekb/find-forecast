@@ -26,41 +26,26 @@ class ExternalBaseService(BaseService):
     #: Bijective domain-query models mapping.
     DOMAIN_TO_QUERY_MODELS_MAP: InjectionDict
 
-    def translate_to_query_params(self, params: List) -> List:
-        """
-        Translate domain forecast params into query params for a client.
+    @classmethod
+    def _translate(cls, mapper, params):
+        try:
+            return [mapper[param] for param in params]
+        except KeyError as error:
+            raise Exception(
+                f"{cls.__name__}: Object {error.args[0]} not found in mapper values {mapper.keys()}"
+            )
 
-        :param params: Domain forecast params.
-        :return: Query params.
-        """
-        return [self.DOMAIN_TO_QUERY_PARAMS_MAP[param] for param in params]
+    def translate_to_query_params(self, params: List) -> List:
+        return self._translate(self.DOMAIN_TO_QUERY_PARAMS_MAP, params)
 
     def translate_to_domain_params(self, params: List) -> List:
-        """
-        Translate query params for a client into domain forecast params.
-
-        :param params: Query params.
-        :return: Domain forecast params.
-        """
-        return [self.DOMAIN_TO_QUERY_PARAMS_MAP.backward[param] for param in params]
+        return self._translate(self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, params)
 
     def translate_to_query_models(self, models: List) -> List:
-        """
-        Translate domain models for a client into query forecast params.
-
-        :param models: Domain weather models.
-        :return: Query weather models.
-        """
-        return [self.DOMAIN_TO_QUERY_MODELS_MAP[model] for model in models]
+        return self._translate(self.DOMAIN_TO_QUERY_MODELS_MAP, models)
 
     def translate_to_domain_models(self, models: List) -> List:
-        """
-        Translate query models for a client into domain forecast params.
-
-        :param models: Query weather models.
-        :return: Domain weather models.
-        """
-        return [self.DOMAIN_TO_QUERY_MODELS_MAP.backward[model] for model in models]
+        return self._translate(self.DOMAIN_TO_QUERY_MODELS_MAP.backward, models)
 
     @abc.abstractmethod
     def get_forecast(
@@ -126,7 +111,12 @@ class OpenMeteoExternalService(ExternalBaseService):
             ForecastParams.WIND_GUSTS: "windgusts_10m",
         }
     )
-    DOMAIN_TO_QUERY_MODELS_MAP = create_bijection_dict({WeatherModels.MODEL_ICON: "icon_seamless"})
+    DOMAIN_TO_QUERY_MODELS_MAP = create_bijection_dict(
+        {
+            WeatherModels.DEFAULT: "gfs",
+            WeatherModels.MODEL_ICON: "icon_seamless",
+        }
+    )
 
     def __init__(self, client: ForecastBaseClient):
         self.client = client
@@ -166,7 +156,10 @@ class ForecastService(BaseService):
 
     def get_external_service(self, service_name: str) -> Union[ExternalBaseService, None]:
         """Get an external service implementation."""
-        return self._external_services.get(service_name)
+        try:
+            return self._external_services[service_name]
+        except KeyError:
+            raise Exception(f"External service {service_name} not found.")
 
     @property
     def _external_services_names(self) -> List:

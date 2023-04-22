@@ -1,12 +1,11 @@
 import abc
 import datetime
-from typing import Dict, List
 
 
 class BaseClient(abc.ABC):
     """Abstract base client class."""
 
-    def __init__(self, config: Dict, *args, **kwargs):
+    def __init__(self, config: dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__init_client__(**config)
 
@@ -20,8 +19,8 @@ class ForecastBaseClient(BaseClient):
 
     @abc.abstractmethod
     def get_forecast_data(
-        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: List, model: str
-    ) -> Dict:
+        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: list, model: str
+    ) -> dict:
         """
         Get forcast data.
 

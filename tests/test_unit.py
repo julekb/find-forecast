@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 import pytest
 import shutil
 from random import randint
@@ -11,7 +11,6 @@ from src.domain import Location, Forecast, ForecastParams, WeatherModels
 from src.services.forecast_services import (
     WindyComExternalService,
     OpenMeteoExternalService,
-    ForecastService,
 )
 from src.repositories import PklRepository
 
@@ -21,11 +20,12 @@ import pandas as pd
 class TestCase:
     @pytest.fixture()
     def windycom_client(self):
-        config = {
-            "user": os.environ["METEOMATICS_USER"],
-            "password": os.environ["METEOMATICS_PASSWORD"],
-        }
-        return WindyComClient(config=config)
+        return WindyComClient(
+            config={
+                "user": os.environ["METEOMATICS_USER"],
+                "password": os.environ["METEOMATICS_PASSWORD"],
+            }
+        )
 
     @pytest.fixture()
     def openmeteo_client(self):
@@ -46,7 +46,7 @@ class TestCase:
 
         assert isinstance(forecast, float)
 
-    def test_openmeteo_client(self, openmeteo_client):
+    def test_openmeteo_client_get_forecast(self, openmeteo_client):
         client = openmeteo_client
         lon = "13.461804"
         lat = "52.520551"
@@ -60,16 +60,30 @@ class TestCase:
 
         assert isinstance(forecast, dict)
 
-    def test_service(self, windycom_client):
+    def test_openmeteo_client_get_historical_data(self, openmeteo_client):
+        client = openmeteo_client
+        lon = "13.461804"
+        lat = "52.520551"
+        start_date = date.today() - timedelta(days=4)
+        end_date = date.today()
+        params = ["temperature_2m"]
+        model = "icon_seamless"
+
+        forecast = client.get_historical_data(
+            lon=lon, lat=lat, start_date=start_date, end_date=end_date, params=params, model=model
+        )
+
+        assert isinstance(forecast, dict)
+
+    def test_service(self, windycom_client, example_location):
         client = windycom_client
         service = WindyComExternalService(client=client)
 
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = [ForecastParams.TEMPERATURE]
-        location = Location(name="Some location", lon="13.461804", lat="52.520551")
 
         forecast = service.get_forecast(
-            location=location,
+            location=example_location,
             target_timestamp=yesterday,
             extra_params=params,
             model=WeatherModels.DEFAULT,
@@ -77,7 +91,7 @@ class TestCase:
 
         assert isinstance(forecast, Forecast)
 
-    def test_openmeteo_service(self, openmeteo_client):
+    def test_openmeteo_service(self, openmeteo_client, example_location):
         client = openmeteo_client
         service = OpenMeteoExternalService(client=client)
         params = [
@@ -88,7 +102,7 @@ class TestCase:
 
         forecast = service.get_forecast(
             target_timestamp=datetime.utcnow(),
-            location=Location(lon="13.461804", lat="52.520551", name="test location"),
+            location=example_location,
             extra_params=params,
             model=WeatherModels.MODEL_ICON,
         )
@@ -96,17 +110,13 @@ class TestCase:
         assert isinstance(forecast, Forecast)
         assert isinstance(forecast.data, pd.DataFrame)
 
-    def test_forecast_service(self, windycom_client):
-        client = windycom_client
-        external_service = WindyComExternalService(client=client)
-        service = ForecastService(external_services=[external_service])
-        location = Location(name="My location", lon="53.11", lat="21.37")
+    def test_forecast_service(self, windycom_client, forecast_service, example_location):
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = [ForecastParams.TEMPERATURE]
         model = WeatherModels.DEFAULT
 
-        forecast = service.get_forecast_for_location(
-            location=location, target_timestamp=yesterday, extra_params=params, model=model
+        forecast = forecast_service.get_forecast_for_location(
+            location=example_location, target_timestamp=yesterday, extra_params=params, model=model
         )
 
         assert isinstance(forecast, Forecast)

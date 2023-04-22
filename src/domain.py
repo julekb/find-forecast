@@ -111,15 +111,9 @@ class Forecast(WeatherData):
         )
 
 
-class Results(BaseDomainModel):
-    """Forecast analysis results."""
-
-
 class ForecastAnalyzer(BaseDomainModel):
-    """Forecast Analyzer domain class."""
-
-    #: Forecasts' results.
-    results: Union[Results, None]
+    def __init__(self, forecasts: list[Forecast]):
+        self.forecasts = forecasts
 
     def analyze(self, forecasts: List[Forecast], weather_log: WeatherLog) -> None:
         """Analyze all forecasts against the weather log.
