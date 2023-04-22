@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.domain import Forecast, Location, ForecastParams, ForecastAnalyzer
+from src.domain.models import Forecast, Location, ForecastParams, ForecastAnalyzer
 from src.services.forecast_services import ForecastService
 
 
@@ -27,7 +27,7 @@ def construct_forecast_analyser(
     params: ForecastParams,
     location: Location,
     target_timestamp: datetime,
-):
+) -> ForecastAnalyzer:
     forecasts = get_forecasts(
         service=service,
         forecast_source_and_models=forecast_source_and_models,

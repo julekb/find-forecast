@@ -7,7 +7,7 @@ import pickle as pkl
 
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.adapters.windycom.client import WindyComClient
-from src.domain import Location, Forecast, ForecastParams, WeatherModels
+from src.domain.models import Location, Forecast, ForecastParams, ForecastModels
 from src.services.forecast_services import (
     WindyComExternalService,
     OpenMeteoExternalService,
@@ -86,7 +86,7 @@ class TestCase:
             location=example_location,
             target_timestamp=yesterday,
             extra_params=params,
-            model=WeatherModels.DEFAULT,
+            model=ForecastModels.DEFAULT,
         )
 
         assert isinstance(forecast, Forecast)
@@ -104,7 +104,7 @@ class TestCase:
             target_timestamp=datetime.utcnow(),
             location=example_location,
             extra_params=params,
-            model=WeatherModels.MODEL_ICON,
+            model=ForecastModels.MODEL_ICON,
         )
 
         assert isinstance(forecast, Forecast)
@@ -113,7 +113,7 @@ class TestCase:
     def test_forecast_service(self, windycom_client, forecast_service, example_location):
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = [ForecastParams.TEMPERATURE]
-        model = WeatherModels.DEFAULT
+        model = ForecastModels.DEFAULT
 
         forecast = forecast_service.get_forecast_for_location(
             location=example_location, target_timestamp=yesterday, extra_params=params, model=model
@@ -136,7 +136,7 @@ class TestCaseRepository:
             data=pd.DataFrame(
                 {ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]}
             ),
-            weather_model=WeatherModels.DEFAULT,
+            weather_model=ForecastModels.DEFAULT,
         )
         return obj
 

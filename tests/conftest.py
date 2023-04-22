@@ -4,7 +4,7 @@ import pytest
 
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.adapters.windycom.client import WindyComClient
-from src.domain import Location
+from src.domain.models import Location
 from src.services.forecast_services import (
     WindyComExternalService,
     ForecastService,

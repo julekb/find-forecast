@@ -3,7 +3,7 @@ import pickle as pkl
 import os
 import re
 
-from src.domain import Forecast
+from src.domain.models import Forecast
 
 
 class BaseRepository(abc.ABC):

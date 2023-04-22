@@ -14,13 +14,8 @@ class BaseDomainModel(abc.ABC):
 
 @dataclass(frozen=True)
 class Location(BaseDomainModel):
-    """Location domain model."""
-
-    #: Location's longitude.
     lon: str
-    #: Location's latitude.
     lat: str
-    # Location's name.
     name: str
 
 
@@ -39,9 +34,9 @@ class ForecastParams(BaseDomainModel):
     WIND_GUSTS = "wind_gusts"
 
 
-class WeatherModels(enum.Enum):
+class ForecastModels(enum.Enum):
     """
-    Weather models enum.
+    Weather forecast models enum.
     """
 
     #: ICON model.
@@ -60,7 +55,6 @@ class WeatherData(BaseDomainModel):
 class WeatherLog(WeatherData):
     """Weather data log."""
 
-    # Source of the weather information.
     source: str
 
 
@@ -75,15 +69,11 @@ class Forecast(WeatherData):
         3. Apply domain logic to find the best forecast model for a given location.
     """
 
-    #: A timestamp when the forecast was created.
     created_at: datetime
     #: A timestamp when the forecast is valid.
     valid_at: datetime
-    #: Location for the forecast.
     location: Location
-    #: Weather forecast model:
-    weather_model: WeatherModels
-    #: Identifier
+    weather_model: ForecastModels
     id: Union[int, None] = None
 
     def set_id(self, identifier: int) -> None:
@@ -116,20 +106,10 @@ class ForecastAnalyzer(BaseDomainModel):
         self.forecasts = forecasts
 
     def analyze(self, forecasts: List[Forecast], weather_log: WeatherLog) -> None:
-        """Analyze all forecasts against the weather log.
+        """Analyze all forecasts against the weather log."""
 
-        :param forecasts: An array of forecasts.
-        :param weather_log: A weather log.
-        """
-        pass
-
-    def get_winning_weather_model(self) -> WeatherModels:
-        """
-        Find a winning forecasting model.
-        :return:
-        """
-        # if not self.results:
-        #     raise
+    def get_winning_weather_model(self) -> ForecastModels:
+        """Find a winning forecasting model."""
         pass
 
 
@@ -146,9 +126,6 @@ class ObservableLocation(BaseDomainModel):
     In the future this will be the Location model.
     """
 
-    #: A location.
     location: Location
-    #: A weather log.
     weather_log: WeatherLog
-    #: Weather forecasts.
     forecasts: List[Forecast]

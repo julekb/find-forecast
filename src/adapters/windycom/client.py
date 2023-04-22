@@ -3,14 +3,11 @@ from requests.auth import HTTPBasicAuth
 import os
 import datetime
 import requests
-from typing import Dict
 
 from src.adapters.models import ForecastBaseClient
 
 
 class WindyComClient(ForecastBaseClient):
-    """Windy.com API client."""
-
     base_url: str
     user: str
     password: str
@@ -23,7 +20,7 @@ class WindyComClient(ForecastBaseClient):
 
     def get_forecast_data(
         self, lon: str, lat: str, target_timestamp: datetime.datetime, params: list, model: str
-    ) -> Dict:
+    ) -> dict:
         query_params = {"model": model}
         date = str(target_timestamp.date())
         path = f"{self.base_url}/{date}T00:00:00Z/{','.join(params)}/{lon},{lat}/json"
