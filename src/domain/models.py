@@ -21,7 +21,6 @@ class Location(BaseDomainModel):
 
 @dataclass(frozen=True)
 class ForecastParams(BaseDomainModel):
-
     # Air params:
     TEMPERATURE = "temperature"
 

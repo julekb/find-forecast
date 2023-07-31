@@ -9,6 +9,7 @@ from src.adapters.models import ForecastBaseClient
 
 class WindyComClient(ForecastBaseClient):
     """Windy.com API client"""
+
     base_url: str
     user: str
     password: str

@@ -7,7 +7,7 @@ from src.domain.models import Forecast
 
 
 class BaseRepository(abc.ABC):
-   ...
+    ...
 
 
 class PklRepository(BaseRepository):
