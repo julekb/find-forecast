@@ -7,7 +7,7 @@ from src.domain.models import Forecast
 
 
 class BaseRepository(abc.ABC):
-    """Base repository class."""
+   ...
 
 
 class PklRepository(BaseRepository):
@@ -27,9 +27,6 @@ class PklRepository(BaseRepository):
         If an object does not have id value, a new value is set,
         and object is saved to storage and returned a new instance
         of a Forecast class with the newly set identifier.
-
-        :param forecast: The Forecast object without id.
-        :return: The Forecast object with id.
         """
         if forecast.id:
             raise
@@ -47,13 +44,6 @@ class PklRepository(BaseRepository):
         return forecast
 
     def retrieve_forecast(self, forecast_id: int) -> Forecast:
-        """
-        Get a Forecast object by identifier.
-
-        :param forecast_id: The Forecast identifier.
-        :return: The Forecast object.
-        """
-
         return self._retrieve_forecast(forecast_id)
 
     def _get_last_forecast_id(self) -> int:

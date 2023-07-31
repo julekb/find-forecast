@@ -17,8 +17,6 @@ class ForecastData:
 
 
 class ExternalBaseService(BaseService):
-    """Base abstract service."""
-
     #: Service name.
     name: str
     #: Bijective domain-query params mapping.
@@ -149,13 +147,10 @@ class OpenMeteoExternalService(ExternalBaseService):
 
 
 class ForecastService(BaseService):
-    """Forecast service implementation."""
-
     def __init__(self, external_services: list[ExternalBaseService]):
         self._external_services = {service.name: service for service in external_services}
 
     def get_external_service(self, service_name: str) -> Union[ExternalBaseService, None]:
-        """Get an external service implementation."""
         try:
             return self._external_services[service_name]
         except KeyError:
@@ -163,13 +158,11 @@ class ForecastService(BaseService):
 
     @property
     def _external_services_names(self) -> list:
-        """Get an array of names of external forecast services."""
         return list(self._external_services.keys())
 
     def get_forecast_for_location(
         self, location: Location, extra_params, target_timestamp, model: ForecastModels
     ) -> Forecast:
-        """Get forecast service for a location."""
         external_service = self.get_external_service(self._external_services_names[0])
         if not external_service:
             raise

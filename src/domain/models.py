@@ -9,7 +9,7 @@ import pandas as pd
 
 
 class BaseDomainModel(abc.ABC):
-    """Abstract base domain class."""
+    ...
 
 
 @dataclass(frozen=True)
@@ -21,9 +21,6 @@ class Location(BaseDomainModel):
 
 @dataclass(frozen=True)
 class ForecastParams(BaseDomainModel):
-    """
-    Forecast params used to fetch a requested forecast.
-    """
 
     # Air params:
     TEMPERATURE = "temperature"
@@ -35,26 +32,17 @@ class ForecastParams(BaseDomainModel):
 
 
 class ForecastModels(enum.Enum):
-    """
-    Weather forecast models enum.
-    """
-
-    #: ICON model.
     MODEL_ICON = "icon"
-    #: Default model.
     DEFAULT = "default"
 
 
 @dataclass
 class WeatherData(BaseDomainModel):
-    #: Pandas DataFrame containing weather data.
     data: pd.DataFrame
 
 
 @dataclass
 class WeatherLog(WeatherData):
-    """Weather data log."""
-
     source: str
 
 
@@ -70,7 +58,6 @@ class Forecast(WeatherData):
     """
 
     created_at: datetime
-    #: A timestamp when the forecast is valid.
     valid_at: datetime
     location: Location
     weather_model: ForecastModels
@@ -85,9 +72,6 @@ class Forecast(WeatherData):
         """
         data property is a DataFrame object that needs special treatment.
         TODO: This can be implemented smarter.
-
-        :param other: Other element to compare with.
-        :return: True if equal, false otherwise
         """
         if not isinstance(other, Forecast):
             return NotImplemented
@@ -109,19 +93,12 @@ class ForecastAnalyzer(BaseDomainModel):
         """Analyze all forecasts against the weather log."""
 
     def get_winning_weather_model(self) -> ForecastModels:
-        """Find a winning forecasting model."""
         pass
 
 
 class ObservableLocation(BaseDomainModel):
     """
-    The Observable Location domain object.
-
     Aggregates all the data needed for further processing.
-    Consists of:
-        - Weather Logs, (support for multiple logs can be added)
-        - Forecasts,
-        - Location.
 
     In the future this will be the Location model.
     """
