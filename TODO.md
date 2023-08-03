@@ -1,5 +1,8 @@
-- [ ] export env variables in docker container
-- [ ] set mypy in CI
-- [ ] run pytest in CI
-- [ ] add diagram
+- [+] export env variables in docker container
+- [+] set mypy in CI
+- [+] run pytest in CI
+- [+] add diagram
 - [ ] write readme description of the project
+- [ ] fix mypy in CI
+- [ ] start shaping the main script
+- 
