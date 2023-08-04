@@ -116,7 +116,11 @@ class TestCase:
         model = ForecastModels.DEFAULT
 
         forecast = forecast_service.get_forecast_for_location(
-            location=example_location, target_timestamp=yesterday, extra_params=params, model=model, external_service_name=WindyComExternalService.name
+            location=example_location,
+            target_timestamp=yesterday,
+            extra_params=params,
+            model=model,
+            external_service_name=WindyComExternalService.name,
         )
 
         assert isinstance(forecast, Forecast)

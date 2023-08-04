@@ -25,14 +25,14 @@ def get_forecasts(
 def construct_forecast_analyser(
     service: ForecastService,
     forecast_source_and_models: list[dict],
-    params: Iterable[ForecastParams],
+    params: Iterable[ForecastParams | str],
     location: Location,
     target_timestamp: datetime,
 ) -> ForecastAnalyzer:
     forecasts = get_forecasts(
         service=service,
         forecast_source_and_models=forecast_source_and_models,
-        params=(params,),
+        params=params,
         location=location,
         target_timestamp=target_timestamp,
     )

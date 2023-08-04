@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Iterable
 import abc
 import datetime
 
@@ -33,16 +33,16 @@ class ExternalBaseService(BaseService):
                 f"{cls.__name__}: Object {error.args[0]} not found in mapper values {mapper.keys()}"
             )
 
-    def translate_to_query_params(self, params: list) -> list:
+    def translate_to_query_params(self, params: Iterable) -> list:
         return self._translate(self.DOMAIN_TO_QUERY_PARAMS_MAP, params)
 
-    def translate_to_domain_params(self, params: list) -> list:
+    def translate_to_domain_params(self, params: Iterable) -> list:
         return self._translate(self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, params)
 
-    def translate_to_query_models(self, models: list) -> list:
+    def translate_to_query_models(self, models: Iterable) -> list:
         return self._translate(self.DOMAIN_TO_QUERY_MODELS_MAP, models)
 
-    def translate_to_domain_models(self, models: list) -> list:
+    def translate_to_domain_models(self, models: Iterable) -> list:
         return self._translate(self.DOMAIN_TO_QUERY_MODELS_MAP.backward, models)
 
     @abc.abstractmethod
@@ -72,7 +72,7 @@ class WindyComExternalService(ExternalBaseService):
         self,
         location: Location,
         target_timestamp: datetime.datetime,
-        extra_params: list,
+        extra_params: Iterable,
         model: ForecastModels,
     ) -> Forecast:
         """Get forecast data from external service."""
@@ -150,7 +150,7 @@ class ForecastService(BaseService):
     def __init__(self, external_services: list[ExternalBaseService]):
         self._external_services = {service.name: service for service in external_services}
 
-    def get_external_service(self, service_name: str) -> Union[ExternalBaseService, None]:
+    def get_external_service(self, service_name: str) -> ExternalBaseService:
         try:
             return self._external_services[service_name]
         except KeyError:
@@ -161,7 +161,12 @@ class ForecastService(BaseService):
         return list(self._external_services.keys())
 
     def get_forecast_for_location(
-        self, location: Location, extra_params, target_timestamp, model: ForecastModels, external_service_name: str
+        self,
+        location: Location,
+        extra_params,
+        target_timestamp,
+        model: ForecastModels,
+        external_service_name: str,
     ) -> Forecast:
         external_service = self.get_external_service(external_service_name)
 
