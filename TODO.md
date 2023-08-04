@@ -3,6 +3,7 @@
 - [+] run pytest in CI
 - [+] add diagram
 - [ ] write readme description of the project
-- [ ] fix mypy in CI
+- [+] fix mypy in CI
+- [ ] figure out forecast analysis process
 - [ ] start shaping the main script
 - 

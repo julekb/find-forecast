@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Iterable
 
 from src.domain.models import Forecast, Location, ForecastParams, ForecastAnalyzer
 from src.services.forecast_services import ForecastService
@@ -24,14 +25,14 @@ def get_forecasts(
 def construct_forecast_analyser(
     service: ForecastService,
     forecast_source_and_models: list[dict],
-    params: ForecastParams,
+    params: Iterable[ForecastParams],
     location: Location,
     target_timestamp: datetime,
 ) -> ForecastAnalyzer:
     forecasts = get_forecasts(
         service=service,
         forecast_source_and_models=forecast_source_and_models,
-        params=params,
+        params=(params,),
         location=location,
         target_timestamp=target_timestamp,
     )

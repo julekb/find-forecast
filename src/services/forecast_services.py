@@ -161,11 +161,10 @@ class ForecastService(BaseService):
         return list(self._external_services.keys())
 
     def get_forecast_for_location(
-        self, location: Location, extra_params, target_timestamp, model: ForecastModels
+        self, location: Location, extra_params, target_timestamp, model: ForecastModels, external_service_name: str
     ) -> Forecast:
-        external_service = self.get_external_service(self._external_services_names[0])
-        if not external_service:
-            raise
+        external_service = self.get_external_service(external_service_name)
+
         cdp = external_service.get_forecast(
             location=location,
             target_timestamp=target_timestamp,

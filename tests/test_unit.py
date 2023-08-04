@@ -110,16 +110,15 @@ class TestCase:
         assert isinstance(forecast, Forecast)
         assert isinstance(forecast.data, pd.DataFrame)
 
-    def test_forecast_service(self, windycom_client, forecast_service, example_location):
+    def test_forecast_service(self, forecast_service, example_location):
         yesterday = datetime.utcnow() - timedelta(days=1)
         params = [ForecastParams.TEMPERATURE]
         model = ForecastModels.DEFAULT
 
         forecast = forecast_service.get_forecast_for_location(
-            location=example_location, target_timestamp=yesterday, extra_params=params, model=model
+            location=example_location, target_timestamp=yesterday, extra_params=params, model=model, external_service_name=WindyComExternalService.name
         )
 
-        assert isinstance(forecast, Forecast)
         assert isinstance(forecast, Forecast)
 
 
