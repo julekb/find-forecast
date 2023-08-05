@@ -6,7 +6,6 @@ import datetime
 from src.adapters.models import ForecastBaseClient
 from src.domain.models import Location, Forecast, ForecastParams, ForecastModels
 from src.utils import create_bijection_dict, InjectionDict
-from src.services.common import BaseService
 
 import pandas as pd
 
@@ -16,12 +15,9 @@ class ForecastData:
     value: str
 
 
-class ExternalBaseService(BaseService):
-    #: Service name.
+class ExternalBaseService:
     name: str
-    #: Bijective domain-query params mapping.
     DOMAIN_TO_QUERY_PARAMS_MAP: InjectionDict
-    #: Bijective domain-query models mapping.
     DOMAIN_TO_QUERY_MODELS_MAP: InjectionDict
 
     @classmethod
@@ -53,15 +49,11 @@ class ExternalBaseService(BaseService):
         extra_params: list,
         model: ForecastModels,
     ) -> Forecast:
-        """Get forecast data from external service."""
+        ...
 
 
 class WindyComExternalService(ExternalBaseService):
-    """External forecast service implementation for windy.com."""
-
-    #: Service name.
     name = "WindyComExternalService"
-    #: Bijective domain-query params mapping.
     DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict({ForecastParams.TEMPERATURE: "t_2m:C"})
     DOMAIN_TO_QUERY_MODELS_MAP = create_bijection_dict({ForecastModels.DEFAULT: "mix"})
 
@@ -75,7 +67,6 @@ class WindyComExternalService(ExternalBaseService):
         extra_params: Iterable,
         model: ForecastModels,
     ) -> Forecast:
-        """Get forecast data from external service."""
         forecast_raw = self.client.get_forecast_data(
             lon=location.lon,
             lat=location.lat,
@@ -96,11 +87,7 @@ class WindyComExternalService(ExternalBaseService):
 
 
 class OpenMeteoExternalService(ExternalBaseService):
-    """External forecast service implementation for Open-Meteo."""
-
-    #: Service name.
     name = "OpenMeteoExternalService"
-    #: Bijective domain-query params mapping.
     DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict(
         {
             ForecastParams.TEMPERATURE: "temperature_2m",
@@ -146,7 +133,7 @@ class OpenMeteoExternalService(ExternalBaseService):
         return forecast
 
 
-class ForecastService(BaseService):
+class ForecastService:
     def __init__(self, external_services: list[ExternalBaseService]):
         self._external_services = {service.name: service for service in external_services}
 

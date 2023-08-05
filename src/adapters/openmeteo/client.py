@@ -7,8 +7,6 @@ from src.adapters.models import ForecastBaseClient
 
 
 class OpenMeteoClient(ForecastBaseClient):
-    """Open-Meteo API client."""
-
     base_url: str
     archive_base_url: str
 

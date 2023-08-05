@@ -13,8 +13,6 @@ class BaseClient(abc.ABC):
 
 
 class ForecastBaseClient(BaseClient):
-    """Abstract base forecast client class."""
-
     @abc.abstractmethod
     def get_forecast_data(
         self, lon: str, lat: str, target_timestamp: datetime.datetime, params: list, model: str

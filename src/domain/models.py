@@ -1,6 +1,5 @@
-import abc
 import enum
-from typing import Union, List
+from typing import Union
 
 from dataclasses import dataclass
 from datetime import datetime
@@ -8,19 +7,15 @@ from datetime import datetime
 import pandas as pd
 
 
-class BaseDomainModel(abc.ABC):
-    ...
-
-
 @dataclass(frozen=True)
-class Location(BaseDomainModel):
+class Location:
     lon: str
     lat: str
     name: str
 
 
 @dataclass(frozen=True)
-class ForecastParams(BaseDomainModel):
+class ForecastParams:
     # Air params:
     TEMPERATURE = "temperature"
 
@@ -36,13 +31,8 @@ class ForecastModels(enum.Enum):
 
 
 @dataclass
-class WeatherData(BaseDomainModel):
+class WeatherData:
     data: pd.DataFrame
-
-
-@dataclass
-class WeatherLog(WeatherData):
-    source: str
 
 
 @dataclass
@@ -82,26 +72,3 @@ class Forecast(WeatherData):
             and all(self.data == other.data)
             and self.location == other.location
         )
-
-
-class ForecastAnalyzer(BaseDomainModel):
-    def __init__(self, forecasts: list[Forecast]):
-        self.forecasts = forecasts
-
-    def analyze(self, forecasts: List[Forecast], weather_log: WeatherLog) -> None:
-        """Analyze all forecasts against the weather log."""
-
-    def get_winning_weather_model(self) -> ForecastModels:
-        pass
-
-
-class ObservableLocation(BaseDomainModel):
-    """
-    Aggregates all the data needed for further processing.
-
-    In the future this will be the Location model.
-    """
-
-    location: Location
-    weather_log: WeatherLog
-    forecasts: List[Forecast]

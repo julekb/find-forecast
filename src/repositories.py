@@ -1,4 +1,3 @@
-import abc
 import pickle as pkl
 import os
 import re
@@ -6,11 +5,7 @@ import re
 from src.domain.models import Forecast
 
 
-class BaseRepository(abc.ABC):
-    ...
-
-
-class PklRepository(BaseRepository):
+class PklRepository:
     #: Storage directory.
     BASE_DIR: str
 
@@ -50,8 +45,6 @@ class PklRepository(BaseRepository):
         """
         Search for all records in the storage and return the identifier
         of with the highest value existing.
-
-        :return: Highest Forecast identifier.
         """
         regex = re.compile(r"forecast_[1-9]\d*.pkl$")
 

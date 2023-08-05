@@ -3,8 +3,7 @@ import os
 
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.adapters.windycom.client import WindyComClient
-from src.domain.functions import construct_forecast_analyser
-from src.domain.models import Location, ForecastModels, ForecastParams
+from src.domain.models import Location, ForecastModels
 from src.services.forecast_services import (
     ForecastService,
     WindyComExternalService,
@@ -30,13 +29,5 @@ if __name__ == "__main__":
         },
         {"forecast_service_name": "WindyComExternalService", "model_name": ForecastModels.DEFAULT},
     ]
-
-    analyser = construct_forecast_analyser(
-        service=forecast_service,
-        forecast_source_and_models=forecast_source_and_models,
-        params=(ForecastParams.TEMPERATURE,),
-        location=location,
-        target_timestamp=datetime.datetime.utcnow() - datetime.timedelta(days=1),
-    )
 
     print("Done.")
