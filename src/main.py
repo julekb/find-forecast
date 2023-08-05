@@ -1,4 +1,3 @@
-import datetime
 import os
 
 from src.adapters.openmeteo.client import OpenMeteoClient
