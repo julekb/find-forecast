@@ -1,8 +1,7 @@
 import enum
-from typing import Union
-
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Union
 
 import pandas as pd
 
@@ -15,7 +14,10 @@ class Location:
 
 
 @dataclass(frozen=True)
-class ForecastParams:
+class WeatherParams:
+    # Meta:
+    TIMESTAMP = "timestamp"
+
     # Air params:
     TEMPERATURE = "temperature"
 

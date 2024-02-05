@@ -1,5 +1,5 @@
-import pickle as pkl
 import os
+import pickle as pkl
 import re
 
 from src.domain.models import Forecast

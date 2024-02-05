@@ -1,13 +1,15 @@
-from dataclasses import dataclass
-from typing import Iterable
 import abc
 import datetime
+from dataclasses import dataclass
+from typing import Iterable
+
+import meteostat
+import pandas as pd
 
 from src.adapters.models import ForecastBaseClient
-from src.domain.models import Location, Forecast, ForecastParams, ForecastModels
-from src.utils import create_bijection_dict, InjectionDict
-
-import pandas as pd
+from src.domain.models import (Forecast, ForecastModels, Location, WeatherData,
+                               WeatherParams)
+from src.utils import InjectionDict, create_bijection_dict
 
 
 @dataclass(frozen=True)
@@ -41,20 +43,57 @@ class ExternalBaseService:
     def translate_to_domain_models(self, models: Iterable) -> list:
         return self._translate(self.DOMAIN_TO_QUERY_MODELS_MAP.backward, models)
 
+
+class ExternalWeatherBaseService(ExternalBaseService):
+    @abc.abstractmethod
+    def get_weather(
+        self,
+        location: Location,
+        target_timestamp: datetime.datetime,
+        extra_params: Iterable,
+    ):
+        ...
+
+
+class ExternalForecastBaseService(ExternalBaseService):
     @abc.abstractmethod
     def get_forecast(
         self,
         location: Location,
         target_timestamp: datetime.datetime,
-        extra_params: list,
+        extra_params: Iterable,
         model: ForecastModels,
     ) -> Forecast:
         ...
 
 
-class WindyComExternalService(ExternalBaseService):
+class MeteostatWeatherService(ExternalBaseService):
+    name = "MeteostatsWeatherExternalService"
+    DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict({WeatherParams.TEMPERATURE: "temp"})
+
+    def _to_obj(self, data) -> pd.DataFrame:
+        if data.index.name != "time":
+            raise Exception("Unexpected index name.")
+        data.index.name = WeatherParams.TIMESTAMP
+        data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
+        return data[self.DOMAIN_TO_QUERY_PARAMS_MAP.backward.values()]
+
+    def get_weather(
+        self,
+        location: Location,
+        timestamp_start: datetime.datetime,
+        timestamp_end: datetime.datetime,
+    ):
+        stations = meteostat.Stations()
+        stations = stations.nearby(float(location.lon), float(location.lat))
+        station = stations.fetch(1)
+        data = meteostat.Hourly(station, timestamp_start, timestamp_end).fetch()
+        return self._to_obj(data)
+
+
+class WindyComExternalService(ExternalForecastBaseService):
     name = "WindyComExternalService"
-    DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict({ForecastParams.TEMPERATURE: "t_2m:C"})
+    DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict({WeatherParams.TEMPERATURE: "t_2m:C"})
     DOMAIN_TO_QUERY_MODELS_MAP = create_bijection_dict({ForecastModels.DEFAULT: "mix"})
 
     def __init__(self, client: ForecastBaseClient):
@@ -86,14 +125,14 @@ class WindyComExternalService(ExternalBaseService):
         return forecast
 
 
-class OpenMeteoExternalService(ExternalBaseService):
+class OpenMeteoExternalService(ExternalForecastBaseService):
     name = "OpenMeteoExternalService"
     DOMAIN_TO_QUERY_PARAMS_MAP = create_bijection_dict(
         {
-            ForecastParams.TEMPERATURE: "temperature_2m",
-            ForecastParams.WIND_SPEED: "windspeed_10m",
-            ForecastParams.WIND_DIRECTION: "winddirection_10m",
-            ForecastParams.WIND_GUSTS: "windgusts_10m",
+            WeatherParams.TEMPERATURE: "temperature_2m",
+            WeatherParams.WIND_SPEED: "windspeed_10m",
+            WeatherParams.WIND_DIRECTION: "winddirection_10m",
+            WeatherParams.WIND_GUSTS: "windgusts_10m",
         }
     )
     DOMAIN_TO_QUERY_MODELS_MAP = create_bijection_dict(
@@ -110,7 +149,7 @@ class OpenMeteoExternalService(ExternalBaseService):
         self,
         location: Location,
         target_timestamp: datetime.datetime,
-        extra_params: list,
+        extra_params: Iterable,
         model: ForecastModels,
     ) -> Forecast:
         forecast_raw = self.client.get_forecast_data(
@@ -131,6 +170,21 @@ class OpenMeteoExternalService(ExternalBaseService):
         )
 
         return forecast
+
+
+class WeatherService:
+    def __init__(self):
+        self.external_service = MeteostatWeatherService()
+
+    def get_weather_for_location(
+        self,
+        location: Location,
+        timestamp_start: datetime.datetime,
+        timestamp_end: datetime.datetime,
+    ) -> WeatherData:
+        data = self.external_service.get_weather(location, timestamp_start, timestamp_end)
+        data = WeatherData(data=data)
+        return data
 
 
 class ForecastService:

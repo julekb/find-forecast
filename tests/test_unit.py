@@ -1,20 +1,18 @@
 import os
-from datetime import timedelta, datetime, date
-import pytest
-import shutil
-from random import randint
 import pickle as pkl
+import shutil
+from datetime import date, datetime, timedelta
+from random import randint
+
+import pandas as pd
+import pytest
 
 from src.adapters.openmeteo.client import OpenMeteoClient
 from src.adapters.windycom.client import WindyComClient
-from src.domain.models import Location, Forecast, ForecastParams, ForecastModels
-from src.services.forecast_services import (
-    WindyComExternalService,
-    OpenMeteoExternalService,
-)
+from src.domain.models import Forecast, ForecastModels, Location, WeatherParams
 from src.repositories import PklRepository
-
-import pandas as pd
+from src.services.weather_services import (OpenMeteoExternalService,
+                                           WindyComExternalService)
 
 
 class TestCase:
@@ -80,7 +78,7 @@ class TestCase:
         service = WindyComExternalService(client=client)
 
         yesterday = datetime.utcnow() - timedelta(days=1)
-        params = [ForecastParams.TEMPERATURE]
+        params = [WeatherParams.TEMPERATURE]
 
         forecast = service.get_forecast(
             location=example_location,
@@ -95,9 +93,9 @@ class TestCase:
         client = openmeteo_client
         service = OpenMeteoExternalService(client=client)
         params = [
-            ForecastParams.WIND_SPEED,
-            ForecastParams.WIND_DIRECTION,
-            ForecastParams.TEMPERATURE,
+            WeatherParams.WIND_SPEED,
+            WeatherParams.WIND_DIRECTION,
+            WeatherParams.TEMPERATURE,
         ]
 
         forecast = service.get_forecast(
@@ -112,7 +110,7 @@ class TestCase:
 
     def test_forecast_service(self, forecast_service, example_location):
         yesterday = datetime.utcnow() - timedelta(days=1)
-        params = [ForecastParams.TEMPERATURE]
+        params = [WeatherParams.TEMPERATURE]
         model = ForecastModels.DEFAULT
 
         forecast = forecast_service.get_forecast_for_location(
@@ -137,7 +135,7 @@ class TestCaseRepository:
             valid_at=datetime.now(),
             location=Location(name="A location", lon="11.22", lat="22.11"),
             data=pd.DataFrame(
-                {ForecastParams.TEMPERATURE: [10, 11, 12], ForecastParams.WIND_SPEED: [15, 18, 18]}
+                {WeatherParams.TEMPERATURE: [10, 11, 12], WeatherParams.WIND_SPEED: [15, 18, 18]}
             ),
             weather_model=ForecastModels.DEFAULT,
         )

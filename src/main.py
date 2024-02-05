@@ -1,32 +1,59 @@
 import os
+from datetime import datetime, timedelta
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from src.adapters.openmeteo.client import OpenMeteoClient
-from src.adapters.windycom.client import WindyComClient
-from src.domain.models import Location, ForecastModels
-from src.services.forecast_services import (
-    ForecastService,
-    WindyComExternalService,
-    OpenMeteoExternalService,
-)
+from src.domain.models import (ForecastModels, Location, WeatherData,
+                               WeatherParams)
+from src.services.weather_services import (OpenMeteoExternalService,
+                                           WeatherService)
+
+PLOTS_DIR = "./plots"
+
+
+def plot_weather_data_as_jpg(weather_data: WeatherData, filename: str) -> None:
+    output_dir = os.path.join(PLOTS_DIR, filename)
+    print(output_dir)
+
+    sns.set_theme()
+    sns.relplot(data=weather_data.data, kind="line")
+    plt.savefig(output_dir, format="jpg", dpi=300)
+
 
 if __name__ == "__main__":
     # bootstrap
+
+    Path(PLOTS_DIR).mkdir(parents=True, exist_ok=True)
+
     windy_com_config: dict = {
         "user": os.environ["METEOMATICS_USER"],
         "password": os.environ["METEOMATICS_PASSWORD"],
     }
-    windy_com_service = WindyComExternalService(client=WindyComClient(config=windy_com_config))
     open_meteo_service = OpenMeteoExternalService(client=OpenMeteoClient(config={}))
-    forecast_service = ForecastService(external_services=[windy_com_service, open_meteo_service])
 
     location = Location(name="My location", lon="53.11", lat="21.37")
+    timestamp = datetime.utcnow() + timedelta(days=1)
 
-    forecast_source_and_models = [
-        {
-            "forecast_service_name": "OpenMeteoExternalService",
-            "model_name": ForecastModels.MODEL_ICON,
-        },
-        {"forecast_service_name": "WindyComExternalService", "model_name": ForecastModels.DEFAULT},
-    ]
+    forecast = open_meteo_service.get_forecast(
+        location=location,
+        extra_params=(WeatherParams.WIND_SPEED,),
+        model=ForecastModels.MODEL_ICON,
+        target_timestamp=timestamp,
+    )
+
+    ###########
+
+    weather_service = WeatherService()
+    location = Location(name="Valencia", lon="39.46975", lat="-0.37739")
+    timestamp_end = datetime.today()
+    timestamp_start = timestamp_end - timedelta(days=2)
+    valencia_weather = weather_service.get_weather_for_location(
+        location, timestamp_start, timestamp_end
+    )
+
+    plot_weather_data_as_jpg(valencia_weather, "valencia_weather.jpg")
 
     print("Done.")

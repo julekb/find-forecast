@@ -1,8 +1,9 @@
-from http import HTTPStatus
-from requests.auth import HTTPBasicAuth
-import os
 import datetime
+import os
+from http import HTTPStatus
+
 import requests
+from requests.auth import HTTPBasicAuth
 
 from src.adapters.models import ForecastBaseClient
 

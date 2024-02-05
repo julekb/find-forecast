@@ -1,7 +1,9 @@
-from http import HTTPStatus
 import datetime
-import requests
 import os
+from http import HTTPStatus
+from typing import Iterable
+
+import requests
 
 from src.adapters.models import ForecastBaseClient
 
@@ -19,7 +21,7 @@ class OpenMeteoClient(ForecastBaseClient):
         self.archive_base_url = archive_base_url
 
     def get_forecast_data(
-        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: list, model: str
+        self, lon: str, lat: str, target_timestamp: datetime.datetime, params: Iterable, model: str
     ) -> dict:
         query_params = (
             ("latitude", lat),
