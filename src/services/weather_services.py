@@ -6,10 +6,10 @@ from typing import Iterable
 import meteostat
 import pandas as pd
 
-from src.adapters.models import ForecastBaseClient
-from src.domain.models import (Forecast, ForecastModels, Location, WeatherData,
-                               WeatherParams)
-from src.utils import InjectionDict, create_bijection_dict
+from adapters.models import ForecastBaseClient
+from domain.models import (Forecast, ForecastModels, Location, WeatherData,
+                           WeatherParams)
+from utils import InjectionDict, create_bijection_dict
 
 
 @dataclass(frozen=True)
@@ -61,6 +61,7 @@ class ExternalForecastBaseService(ExternalBaseService):
         self,
         location: Location,
         target_timestamp: datetime.datetime,
+        end_timestamp: datetime.datetime,
         extra_params: Iterable,
         model: ForecastModels,
     ) -> Forecast:
@@ -74,9 +75,22 @@ class MeteostatWeatherService(ExternalBaseService):
     def _to_obj(self, data) -> pd.DataFrame:
         if data.index.name != "time":
             raise Exception("Unexpected index name.")
+
         data.index.name = WeatherParams.TIMESTAMP
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
         return data[self.DOMAIN_TO_QUERY_PARAMS_MAP.backward.values()]
+
+    @staticmethod
+    def _to_locations(data: pd.DataFrame) -> list[Location]:
+        stations_by_id = data.transpose().to_dict()
+        return [
+            Location(
+                name=station_dict["name"] + " station",
+                lon=str(station_dict["longitude"]),
+                lat=str(station_dict["latitude"]),
+            )
+            for station_dict in stations_by_id.values()
+        ]
 
     def get_weather(
         self,
@@ -85,10 +99,16 @@ class MeteostatWeatherService(ExternalBaseService):
         timestamp_end: datetime.datetime,
     ):
         stations = meteostat.Stations()
-        stations = stations.nearby(float(location.lon), float(location.lat))
+        stations = stations.nearby(lat=float(location.lat), lon=float(location.lon))
         station = stations.fetch(1)
         data = meteostat.Hourly(station, timestamp_start, timestamp_end).fetch()
         return self._to_obj(data)
+
+    def find_stations_for_location(self, location: Location, n: int = 5) -> list[Location]:
+        stations = meteostat.Stations()
+        stations = stations.nearby(float(location.lon), float(location.lat))
+        stations = stations.fetch(n)
+        return self._to_locations(stations)
 
 
 class WindyComExternalService(ExternalForecastBaseService):
@@ -103,6 +123,7 @@ class WindyComExternalService(ExternalForecastBaseService):
         self,
         location: Location,
         target_timestamp: datetime.datetime,
+        end_timestamp: datetime.datetime,
         extra_params: Iterable,
         model: ForecastModels,
     ) -> Forecast:
@@ -149,6 +170,7 @@ class OpenMeteoExternalService(ExternalForecastBaseService):
         self,
         location: Location,
         target_timestamp: datetime.datetime,
+        end_timestamp: datetime.datetime,
         extra_params: Iterable,
         model: ForecastModels,
     ) -> Forecast:
@@ -159,8 +181,17 @@ class OpenMeteoExternalService(ExternalForecastBaseService):
             params=self.translate_to_query_params(extra_params),
             model=self.translate_to_query_models([model])[0],
         )
+
+        forecast_raw["time"] = [
+            datetime.datetime.fromisoformat(timestamp_str) for timestamp_str in forecast_raw["time"]
+        ]
         data = pd.DataFrame.from_dict(forecast_raw)
+
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
+        data.rename(columns={"time": WeatherParams.TIMESTAMP}, inplace=True)
+        data.set_index(WeatherParams.TIMESTAMP, inplace=True)
+        data = data[:end_timestamp]
+
         forecast = Forecast(
             created_at=datetime.datetime.now(),
             valid_at=datetime.datetime.now(),
@@ -183,8 +214,11 @@ class WeatherService:
         timestamp_end: datetime.datetime,
     ) -> WeatherData:
         data = self.external_service.get_weather(location, timestamp_start, timestamp_end)
-        data = WeatherData(data=data)
+        data = WeatherData(data=data, location=location)
         return data
+
+    def get_nearest_station_location(self, location: Location) -> Location:
+        return self.external_service.find_stations_for_location(location, 1)[0]
 
 
 class ForecastService:
@@ -214,6 +248,7 @@ class ForecastService:
         cdp = external_service.get_forecast(
             location=location,
             target_timestamp=target_timestamp,
+            end_timestamp=target_timestamp + datetime.timedelta(days=7),  # TODO
             extra_params=extra_params,
             model=model,
         )

@@ -5,7 +5,7 @@ from http import HTTPStatus
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.adapters.models import ForecastBaseClient
+from adapters.models import ForecastBaseClient
 
 
 class WindyComClient(ForecastBaseClient):

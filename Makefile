@@ -12,7 +12,3 @@ rebuild:
 
 bash:
 	docker exec -it find-forecast-find-forecast-1 bash
-
-test:
-	bash
-	pytest

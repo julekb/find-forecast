@@ -1,7 +1,10 @@
 .env
 
 plots/
+.pytest_cache/
 
 *.iml
 *.xml
 *.pkl
+*.jpg
+*.png

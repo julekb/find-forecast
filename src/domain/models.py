@@ -34,13 +34,35 @@ class ForecastModels(enum.Enum):
 
 @dataclass
 class WeatherData:
+    TYPE_IDENTIFIER = "historical"
+
     data: pd.DataFrame
+
+    location: Location
+
+    def __add__(self, other):
+        if not isinstance(other, WeatherData):
+            raise TypeError("Incorrect types.")
+
+        if self.location != other.location:
+            raise Exception
+
+        if self.TYPE_IDENTIFIER != other.TYPE_IDENTIFIER:
+            self.data["type"] = self.TYPE_IDENTIFIER
+            other.data["type"] = other.TYPE_IDENTIFIER
+
+            self.data.set_index(["type"], append=True, inplace=True)
+            other.data.set_index(["type"], append=True, inplace=True)
+
+        self.data = pd.concat([self.data, other.data])
+
+        return self
 
 
 @dataclass
 class Forecast(WeatherData):
     """
-    Forecast domain model represents a forecast for a location for a given time interval.
+    Weather data container.
 
     This object is part of the core domain of this project and will utilize various modules:
         1. Fetch the Forecast object with the ForecastService.
@@ -48,9 +70,10 @@ class Forecast(WeatherData):
         3. Apply domain logic to find the best forecast model for a given location.
     """
 
+    TYPE_IDENTIFIER = "forecast"
+
     created_at: datetime
     valid_at: datetime
-    location: Location
     weather_model: ForecastModels
     id: Union[int, None] = None
 

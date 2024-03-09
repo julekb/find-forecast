@@ -2,12 +2,12 @@ import os
 
 import pytest
 
-from src.adapters.openmeteo.client import OpenMeteoClient
-from src.adapters.windycom.client import WindyComClient
-from src.domain.models import Location
-from src.services.weather_services import (ForecastService,
-                                           OpenMeteoExternalService,
-                                           WindyComExternalService)
+from adapters.openmeteo.client import OpenMeteoClient
+from adapters.windycom.client import WindyComClient
+from domain.models import Location
+from services.weather_services import (ForecastService,
+                                       OpenMeteoExternalService,
+                                       WindyComExternalService)
 
 
 @pytest.fixture()

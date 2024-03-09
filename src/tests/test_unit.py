@@ -7,12 +7,12 @@ from random import randint
 import pandas as pd
 import pytest
 
-from src.adapters.openmeteo.client import OpenMeteoClient
-from src.adapters.windycom.client import WindyComClient
-from src.domain.models import Forecast, ForecastModels, Location, WeatherParams
-from src.repositories import PklRepository
-from src.services.weather_services import (OpenMeteoExternalService,
-                                           WindyComExternalService)
+from adapters.openmeteo.client import OpenMeteoClient
+from adapters.windycom.client import WindyComClient
+from domain.models import Forecast, ForecastModels, Location, WeatherParams
+from repositories import PklRepository
+from services.weather_services import (OpenMeteoExternalService,
+                                       WindyComExternalService)
 
 
 class TestCase:
@@ -83,6 +83,7 @@ class TestCase:
         forecast = service.get_forecast(
             location=example_location,
             target_timestamp=yesterday,
+            end_timestamp=yesterday,
             extra_params=params,
             model=ForecastModels.DEFAULT,
         )
@@ -100,6 +101,7 @@ class TestCase:
 
         forecast = service.get_forecast(
             target_timestamp=datetime.utcnow(),
+            end_timestamp=datetime.utcnow(),
             location=example_location,
             extra_params=params,
             model=ForecastModels.MODEL_ICON,

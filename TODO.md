@@ -6,4 +6,5 @@
 - [+] fix mypy in CI
 - [ ] figure out forecast analysis process
 - [ ] start shaping the main script
-- 
+- [ ] multiindex for WeatherData
+- [ ] check if all services return UTC timestamp

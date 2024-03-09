@@ -1,8 +1,9 @@
+import dataclasses
 import os
 import pickle as pkl
 import re
 
-from src.domain.models import Forecast
+from domain.models import Forecast
 
 
 class PklRepository:
@@ -53,3 +54,14 @@ class PklRepository:
             return 0
         forecast_ids = [int(fname[9:-4]) for fname in forecast_names]
         return max(forecast_ids)
+
+
+@dataclasses.dataclass
+class LocationRepository:
+    locations_data: dict
+
+    def get_location(self, location_name: str):
+        try:
+            return self.locations_data[location_name]
+        except KeyError:
+            raise Exception("Location not found.")

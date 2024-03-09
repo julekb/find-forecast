@@ -1,5 +1,6 @@
 black==23.3.0
 flake8==6.0.0
+ipdb==0.13.13
 isort==5.13.2
 meteostat==1.6.7
 mypy==0.971

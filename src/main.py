@@ -5,13 +5,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from src.adapters.openmeteo.client import OpenMeteoClient
-from src.domain.models import (ForecastModels, Location, WeatherData,
-                               WeatherParams)
-from src.services.weather_services import (OpenMeteoExternalService,
-                                           WeatherService)
-
-PLOTS_DIR = "./plots"
+from adapters.openmeteo.client import OpenMeteoClient
+from constants import PLOTS_DIR
+from domain.models import ForecastModels, Location, WeatherData, WeatherParams
+from services.weather_services import OpenMeteoExternalService, WeatherService
 
 
 def plot_weather_data_as_jpg(weather_data: WeatherData, filename: str) -> None:

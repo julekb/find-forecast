@@ -5,7 +5,7 @@ from typing import Iterable
 
 import requests
 
-from src.adapters.models import ForecastBaseClient
+from adapters.models import ForecastBaseClient
 
 
 class OpenMeteoClient(ForecastBaseClient):
