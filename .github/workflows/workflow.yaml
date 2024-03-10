@@ -26,7 +26,7 @@ jobs:
       - name: Run Flake8
         run: docker exec find-forecast_find-forecast_1 flake8
       - name: Run MyPy
-        run: docker exec find-forecast_find-forecast_1 mypy .
+        run: docker exec find-forecast_find-forecast_1 mypy --config-file=../pyproject.toml .
 
   tests:
     needs: build
@@ -49,4 +49,4 @@ jobs:
           METEOMATICS_PASSWORD: ${{ secrets.METEOMATICS_PASSWORD }}
           OPENMETEO_API_URL: ${{ secrets.OPENMETEO_API_URL }}
       - name: Run Pytest
-        run: docker exec find-forecast_find-forecast_1 pytest ../tests
+        run: docker exec find-forecast_find-forecast_1 pytest tests

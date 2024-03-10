@@ -190,7 +190,8 @@ class OpenMeteoExternalService(ExternalForecastBaseService):
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
         data.rename(columns={"time": WeatherParams.TIMESTAMP}, inplace=True)
         data.set_index(WeatherParams.TIMESTAMP, inplace=True)
-        data = data[:end_timestamp]
+
+        data = data[:end_timestamp]  # type: ignore
 
         forecast = Forecast(
             created_at=datetime.datetime.now(),
@@ -222,17 +223,17 @@ class WeatherService:
 
 
 class ForecastService:
-    def __init__(self, external_services: list[ExternalBaseService]):
+    def __init__(self, external_services: list[ExternalForecastBaseService]):
         self._external_services = {service.name: service for service in external_services}
 
-    def get_external_service(self, service_name: str) -> ExternalBaseService:
+    def get_external_service(self, service_name: str) -> ExternalForecastBaseService:
         try:
             return self._external_services[service_name]
         except KeyError:
             raise Exception(f"External service {service_name} not found.")
 
     @property
-    def _external_services_names(self) -> list:
+    def _external_services_names(self) -> list[str]:
         return list(self._external_services.keys())
 
     def get_forecast_for_location(

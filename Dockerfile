@@ -14,7 +14,7 @@ ENV METEOMATICS_PASSWORD=$METEOMATICS_PASSWORD
 ENV OPENMETEO_API_URL=$OPENMETEO_API_URL
 ENV OPENMETEO_ARCHIVE_API_URL=$OPENMETEO_ARCHIVE_API_URL
 
-COPY requirements.txt ./
+COPY requirements.txt pyproject.toml ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 

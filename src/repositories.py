@@ -3,7 +3,7 @@ import os
 import pickle as pkl
 import re
 
-from domain.models import Forecast
+from domain.models import Forecast, Location
 
 
 class PklRepository:
@@ -60,7 +60,7 @@ class PklRepository:
 class LocationRepository:
     locations_data: dict
 
-    def get_location(self, location_name: str):
+    def get_location(self, location_name: str) -> Location:
         try:
             return self.locations_data[location_name]
         except KeyError:

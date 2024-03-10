@@ -39,6 +39,7 @@ if __name__ == "__main__":
         extra_params=(WeatherParams.WIND_SPEED,),
         model=ForecastModels.MODEL_ICON,
         target_timestamp=timestamp,
+        end_timestamp=timestamp
     )
 
     ###########

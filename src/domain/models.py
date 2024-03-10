@@ -13,8 +13,7 @@ class Location:
     name: str
 
 
-@dataclass(frozen=True)
-class WeatherParams:
+class WeatherParams(enum.Enum):
     # Meta:
     TIMESTAMP = "timestamp"
 

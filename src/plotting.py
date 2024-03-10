@@ -1,6 +1,5 @@
 import os
 
-import seaborn as sns
 from matplotlib import pyplot as plt
 from seaborn import objects as so
 
@@ -16,7 +15,8 @@ def plot_weather_data_as_jpg(
     # sns.set_style("darkgrid", {"axes.facecolor": ".9"})
     # sns.set_context("paper")
     #
-    # sns.relplot(data=weather_data.data, x=WeatherParams.TIMESTAMP, y=x_key, kind="line", hue="type")
+    # sns.relplot(
+    # data=weather_data.data, x=WeatherParams.TIMESTAMP, y=x_key, kind="line", hue="type")
     # plt.xticks(rotation=90)
     # plt.savefig(output_dir, format="jpg", dpi=300)
     fig, ax = plt.subplots()

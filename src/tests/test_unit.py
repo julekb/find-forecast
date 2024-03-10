@@ -183,7 +183,7 @@ class TestCaseRepository:
             pkl.dump("", f)
         with open(f"{self.BASE_DIR}{self.STORAGE_DIR}forecast_2.pkl", "wb") as f:
             pkl.dump("", f)
-        with open(f"{self.BASE_DIR}{self.STORAGE_DIR}notforcast_1.pkl", "wb") as f:
+        with open(f"{self.BASE_DIR}{self.STORAGE_DIR}not_forcast_1.pkl", "wb") as f:
             pkl.dump("", f)
 
         max_id = repository._get_last_forecast_id()
