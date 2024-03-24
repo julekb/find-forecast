@@ -22,6 +22,6 @@ def plot_weather_data_as_jpg(
     fig, ax = plt.subplots()
     ax.xaxis.set_tick_params(rotation=90)
 
-    p = so.Plot(data=weather_data.data, x=WeatherParams.TIMESTAMP, y=str(x_key), color="type")
+    p = so.Plot(data=weather_data.data, x=WeatherParams.TIMESTAMP, y=x_key, color="type")
     p = p.add(so.Line()).on(ax)
     p.save(output_dir, format="jpg")

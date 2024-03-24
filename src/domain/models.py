@@ -13,7 +13,7 @@ class Location:
     name: str
 
 
-class WeatherParams(enum.Enum):
+class WeatherParams(str, enum.Enum):
     # Meta:
     TIMESTAMP = "timestamp"
 

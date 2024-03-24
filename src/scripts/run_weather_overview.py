@@ -16,7 +16,7 @@ def run_weather_overview(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
     weather_params: Sequence[WeatherParams],
-    forecast_model: ForecastModels,
+    forecast_models: Sequence[ForecastModels],
 ) -> None:
     if len(weather_params) == 0:
         raise Exception("Weather params sequence can't be empty.")
@@ -34,11 +34,14 @@ def run_weather_overview(
     now = datetime.datetime.utcnow()
 
     weather = weather_service.get_weather_for_location(location, start_date, now)
-    forecast = open_meteo_service.get_forecast(
-        location, now, end_date, weather_params, forecast_model
-    )
+    forecasts = []
+    for forecast_model in forecast_models:
+        forecast = open_meteo_service.get_forecast(
+            location, now, end_date, weather_params, forecast_model
+        )
+        forecasts.append(forecast)
 
-    composite_data = weather + forecast
+    composite_data = weather + forecasts[0]
 
     plot_weather_data_as_jpg(composite_data, weather_params[0], "weather_and_forecast.jpg")
 
@@ -50,7 +53,7 @@ if __name__ == "__main__":
     now = datetime.datetime.now()
     start_date = now - datetime.timedelta(days=3)
     end_date = now + datetime.timedelta(days=3)
-    forecast_model = ForecastModels.MODEL_ICON
+    forecast_models = (ForecastModels.MODEL_ICON, ForecastModels.DEFAULT)
     weather_params = (WeatherParams.TEMPERATURE,)
 
     run_weather_overview(
@@ -58,7 +61,7 @@ if __name__ == "__main__":
         start_date=start_date,
         end_date=end_date,
         weather_params=weather_params,
-        forecast_model=forecast_model,
+        forecast_models=forecast_models,
     )
 
     print("Weather overview script finished.")

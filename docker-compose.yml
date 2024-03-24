@@ -3,10 +3,28 @@ version: '3.9'
 services:
   find-forecast:
     env_file:
-      - .env  # not very safe
+      - .env.values
+      - .env.secrets
     build: .
     tty: true
     ports:
       - "5001:5001"
     volumes:
       - ./://usr/app/:delegated
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:7.0
+    hostname: localhost
+    env_file:
+      - .env.values
+      - .env.secrets
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata6:/data/db
+    command: mongod
+
+volumes:
+  dbdata6:

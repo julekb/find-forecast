@@ -10,7 +10,8 @@ import pytest
 from adapters.openmeteo.client import OpenMeteoClient
 from adapters.windycom.client import WindyComClient
 from domain.models import Forecast, ForecastModels, Location, WeatherParams
-from repositories import PklRepository
+from repositories import (CompositeRepositoryImplementation, DBConfig,
+                          PklRepository)
 from services.weather_services import (OpenMeteoExternalService,
                                        WindyComExternalService)
 
@@ -189,3 +190,12 @@ class TestCaseRepository:
         max_id = repository._get_last_forecast_id()
 
         assert max_id == 2
+
+
+@pytest.fixture()
+def db_config():
+    return DBConfig(host="mongodb", port=27017, user="mongo_user", password="password")
+
+
+def test_configure_composite_repository(db_config):
+    repository = CompositeRepositoryImplementation(db_config)

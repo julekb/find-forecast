@@ -3,6 +3,8 @@ import os
 import pickle as pkl
 import re
 
+from pymongo import MongoClient
+
 from domain.models import Forecast, Location
 
 
@@ -54,6 +56,24 @@ class PklRepository:
             return 0
         forecast_ids = [int(fname[9:-4]) for fname in forecast_names]
         return max(forecast_ids)
+
+
+@dataclasses.dataclass(frozen=True)
+class DBConfig:
+    host: str
+    port: int
+    user: str
+    password: str
+
+
+class CompositeRepositoryImplementation:
+    def __init__(self, db_config: DBConfig) -> None:
+        self.client = MongoClient(
+            host=db_config.host,
+            port=db_config.port,
+            username=db_config.user,
+            password=db_config.password,
+        )
 
 
 @dataclasses.dataclass

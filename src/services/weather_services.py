@@ -76,7 +76,7 @@ class MeteostatWeatherService(ExternalBaseService):
         if data.index.name != "time":
             raise Exception("Unexpected index name.")
 
-        data.index.name = WeatherParams.TIMESTAMP
+        data.index.name = WeatherParams.TIMESTAMP.value
         data.rename(columns=self.DOMAIN_TO_QUERY_PARAMS_MAP.backward, inplace=True)
         return data[self.DOMAIN_TO_QUERY_PARAMS_MAP.backward.values()]
 

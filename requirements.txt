@@ -6,6 +6,7 @@ meteostat==1.6.7
 mypy==0.971
 pandas-stubs==1.5.3.230321
 pandas==1.5.3
+pymongo==4.6.2
 pytest==7.2.2
 requests==2.28.2
 seaborn==0.13.2
